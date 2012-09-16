@@ -1,7 +1,5 @@
 <?php
 
-$index_php_time = date("U");
-
 require_once("def.php");
 require_once("error.php");
 require_once(DOC_ROOT . "/classes/AppServices.php");
