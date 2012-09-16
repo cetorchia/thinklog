@@ -1,0 +1,4 @@
+Thinklog is copyright (c) 2010 Carlos E. Torchia.
+It must be redistributed according to the GNU General Public License (GPL)
+version 2. No implicit or explicit warranty whatsoever.
+See http://www.fsf.org/ for details on the GNU GPL v2.

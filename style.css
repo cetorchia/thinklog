@@ -1,0 +1,116 @@
+/*
+ * Thinklog style sheet
+ */
+
+
+/*
+ * --- Content containers ---
+ */
+
+
+/* body */
+
+body,td {
+	background:  #668;
+	color:       #000;
+	font-size:   85%;
+	font-family: sans-serif;
+}
+
+.section,.section td {
+	background: #fff;
+	color:      #000;
+}
+
+.section {
+	padding:    1em;
+	margin:     0.5em;
+}
+
+
+/*
+ * messages
+ */
+
+.thot_error {
+	color: #c11;
+}
+
+.thot_success {
+	color: #1a1;
+}
+
+
+/*
+ * copyright
+ */
+
+#copyright {
+	font-size: 80%;
+}
+
+
+/*
+ * ---- Basic but essential elements. ----
+ */
+
+
+/*
+ * headers
+ */
+
+h1,h2,h3 {
+	color: #222;
+}
+
+h1 {
+	font-size:   200%;
+	font-weight: normal;
+}
+
+h2 {
+	font-size:   150%;
+	font-weight: normal;
+}
+
+h3 {
+	font-size:   135%;
+	font-weight: normal;
+}
+
+
+/*
+ * Separator, should you need one.
+ */
+
+hr {
+	border-top:    1px solid #bbf;
+	border-bottom: 0;
+	border-left:   0;
+	border-right:  0;
+}
+
+
+/*
+ * Links
+ */
+
+a:link, a:visited {
+	color:           #722;
+	text-decoration: underline;
+}
+
+a:hover {
+	color: #1b1;
+}
+
+a img {
+	border-style: none;
+}
+
+
+/* It can be really ugly... */
+
+li {
+	padding-bottom: 3px;
+}
