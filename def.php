@@ -1,13 +1,13 @@
 <?php
 
 // web host
-define("THINKLOG_URL", "http://web.uvic.ca/~ctorchia/thinklog/");
+define("THINKLOG_URL", "http://localhost/carlos/thinklog/");
 
 //
 // Directory definitions
 //
 
-define("DOC_ROOT", "/home/ctorchia/workspace/thinklog/");
+define("DOC_ROOT", "/home/ctorchia/public_html/thinklog/");
 
 //
 // Database definitions
