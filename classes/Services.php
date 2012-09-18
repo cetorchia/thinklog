@@ -7,7 +7,6 @@
 abstract class Services
 {
 	public $timerService;
-	public $tripleStoreService;
 	public $thinkerService;
 	public $thoughtService;
 	public $queryService;

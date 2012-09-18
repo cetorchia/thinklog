@@ -5,14 +5,12 @@
 
 class CommonKeywordService
 {
-	protected $store;
 	protected $keywordService;
 	protected $timerService;
 
 	function __construct($services)
 	{
 		// Get context
-		$this->store = $services->tripleStoreService->getStore();
 		$this->keywordService = $services->keywordService;
 		$this->timerService = $services->timerService;
 	}
@@ -23,45 +21,15 @@ class CommonKeywordService
 
 	function update()
 	{
-		// Find keywords and their counts
-		$query = SPARQL_PREFIXES .
-		         "SELECT ?k COUNT(?t) AS ?cnt WHERE { " .
-		         "  ?w a thinklog:Keyword. " .
-		         "  ?w rdfs:label ?k. " .
-		         "  ?t thinklog:mentions ?w. " .
-		         "} " .
-		         "GROUP BY ?k ";
+		// Put keywords that occur enough times
 		$this->timerService->start('query');
-		$rows = $this->store->query($query,"rows");
-		echo "Found keyword counts in " . $this->timerService->read('query') . " seconds\n";
-
-		// Filter common ones, save keyword counts
-		$words = array();
-		$counts = array();
-		foreach($rows as $row)
-		{
-			$word = $row["k"];
-			$cnt = $row["cnt"];
-
-			// Record count
-			$counts[$word] = $cnt;
-
-			// If we passed the threshold, it's a "common keyword"
-			if($row["cnt"] >= KEYWORD_THRESHOLD)
-			{
-				$words[$word] = $word;
-				echo "  $word is a common keyword\n";
-			}
+		$query = "INSERT INTO common_keywords " .
+		         "SELECT keyword_id from keyword_count " .
+		         "WHERE cnt > " . KEYWORD_THRESHOLD;
+		if (!mysql_query($query)) {
+			echo "  warning: could not add new common keywords:\n";
+			echo "           ".mysql_error()."\n";
 		}
-
-		// Insert these words as common keywords
-		$this->timerService->start('query');
-		$this->keywordService->addCommonKeywords($words);
 		echo "Updated common keywords in " . $this->timerService->read('query') . " seconds\n";
-
-		// Update keyword counts
-		$this->timerService->start('query');
-		$this->keywordService->addKeywordCounts($counts);
-		echo "Updated keyword counts in " . $this->timerService->read('query') . " seconds\n";
 	}
 }

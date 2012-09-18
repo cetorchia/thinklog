@@ -7,11 +7,8 @@
 
 class TagCloudService
 {
-	protected $store;
-
 	function __construct($services)
 	{
-		$this->store = $services->tripleStoreService->getStore();
 	}
 
 	//
@@ -22,41 +19,36 @@ class TagCloudService
 	{
 		// Query for keywords related to this thought and thinker
 		if($thinkerId) {
-			$query = SPARQL_PREFIXES .
-				"SELECT DISTINCT ?keyword WHERE { " .
-				"  ?thought a thinklog:Thought; " .
-				"           thinklog:author ?thinker; " .
-				"           thinklog:mentions ?k. " .
-				"  ?thinker a thinklog:Thinker; " .
-				"           thinklog:thinkerId \"$thinkerId\". " .
-				"  ?k thinklog:count ?cnt. " .
-				"  ?k rdfs:label ?keyword. " .
-				"} " .
-				"ORDER BY DESC(?cnt) LIMIT 5 ";
+			$query = "SELECT DISTINCT keyword " .
+			         "FROM keywords, keyword_count, mentions, thoughts " .
+			         "WHERE keywords.keyword_id = keyword_count.keyword_id " .
+			         "  AND keywords.keyword_id = mentions.keyword_id " .
+			         "  AND thoughts.thought_id = mentions.thought_id " .
+			         "  AND thoughts.thinker_id = '$thinkerId' " .
+			         "ORDER BY cnt DESC " .
+			         "LIMIT 5 ";
 		}
 		else if($thoughtId) {
-			$query = SPARQL_PREFIXES .
-				"SELECT DISTINCT ?keyword WHERE { " .
-				"  ?thought a thinklog:Thought; " .
-				"           thinklog:thoughtId \"$thoughtId\"; " .
-				"           thinklog:mentions ?k. " .
-				"  ?k rdfs:label ?keyword. " .
-				"} ";
+			$query = "SELECT DISTINCT keyword " .
+			         "FROM keywords, keyword_count, mentions, thoughts " .
+			         "WHERE keywords.keyword_id = keyword_count.keyword_id " .
+			         "  AND keywords.keyword_id = mentions.keyword_id " .
+			         "  AND thoughts.thought_id = mentions.thought_id " .
+			         "  AND thoughts.thought_id = $thoughtId " .
+			         "ORDER BY cnt DESC " .
+			         "LIMIT 5 ";
 		}
 		else {
-			$query = SPARQL_PREFIXES .
-				"SELECT ?keyword WHERE { " .
-				"  ?k a thinklog:Keyword. " .
-				"  ?k thinklog:count ?cnt. " .
-				"  ?k rdfs:label ?keyword. " .
-				"} " .
-				"ORDER BY DESC(?cnt) LIMIT 5 ";
+			$query = "SELECT DISTINCT keyword " .
+			         "FROM keywords, keyword_count " .
+			         "ORDER BY cnt DESC " .
+			         "LIMIT 5 ";
 		}
-		$rows = $this->store->query($query, "rows");
+		$result = mysql_query($query);
 
 		// Get the keywords
 		$keywords = array();
-		foreach($rows as $row) {
+		while ($row = mysql_fetch_array($result)) {
 			$keywords[$row["keyword"]] = $row["keyword"];
 		}
 
@@ -70,54 +62,51 @@ class TagCloudService
 	{
 		// Query for keyword pairs related to this thought and thinker
 		if($thinkerId) {
-			$query = SPARQL_PREFIXES .
-				"SELECT DISTINCT ?keyword1 ?keyword2 WHERE { " .
-				"  ?thought a thinklog:Thought; " .
-				"           thinklog:author ?thinker; " .
-				"           thinklog:mentions ?k1; " .
-				"           thinklog:mentions ?k2. " .
-				"  ?thinker a thinklog:Thinker; " .
-				"           thinklog:thinkerId \"$thinkerId\". " .
-				"  ?rel a thinklog:PairCount. " .
-				"  ?rel thinklog:keyword1 ?k1. " .
-				"  ?rel thinklog:keyword2 ?k2. " .
-				"  ?rel thinklog:count ?cnt. " .
-				"  ?k1 rdfs:label ?keyword1. " .
-				"  ?k2 rdfs:label ?keyword2. " .
-				"  FILTER(?keyword1 < ?keyword2). " .
-				"} " .
-				"ORDER BY DESC(?cnt) LIMIT 5 ";
+			$query = "SELECT DISTINCT k1.keyword, k2.keyword " .
+			         "FROM keywords k1, keywords k2, keyword_pair_count, " .
+			         "     mentions m1, mentions m2, thoughts t1, thoughts t2 " .
+			         "WHERE k1.keyword_id = keyword_pair_count.keyword1 " .
+			         "  AND k2.keyword_id = keyword_pair_count.keyword2 " .
+			         "  AND k1.keyword_id = m1.keyword_id " .
+			         "  AND k2.keyword_id = m2.keyword_id " .
+			         "  AND t1.thought_id = m1.thought_id " .
+			         "  AND t2.thought_id = m2.thought_id " .
+			         "  AND t1.thinker_id = '$thinkerId' " .
+			         "  AND t2.thinker_id = '$thinkerId' " .
+			         "  AND k1.keyword < k2.keyword " .
+			         "ORDER BY cnt DESC " .
+			         "LIMIT 5 ";
 		}
 		else if($thoughtId) {
-			$query = SPARQL_PREFIXES .
-				"SELECT DISTINCT ?keyword1 ?keyword2 WHERE { " .
-				"  ?thought a thinklog:Thought; " .
-				"           thinklog:thoughtId \"$thoughtId\"; " .
-				"           thinklog:mentions ?k1; " .
-				"           thinklog:mentions ?k2. " .
-				"  ?k1 rdfs:label ?keyword1. " .
-				"  ?k2 rdfs:label ?keyword2. " .
-				"  FILTER(?keyword1 < ?keyword2). " .
-				"} ";
+			$query = "SELECT DISTINCT k1.keyword, k2.keyword " .
+			         "FROM keywords k1, keywords k2, keyword_pair_count, " .
+			         "     mentions m1, mentions m2, thoughts t1, thoughts t2 " .
+			         "WHERE k1.keyword_id = keyword_pair_count.keyword1 " .
+			         "  AND k2.keyword_id = keyword_pair_count.keyword2 " .
+			         "  AND k1.keyword_id = m1.keyword_id " .
+			         "  AND k2.keyword_id = m2.keyword_id " .
+			         "  AND t1.thought_id = m1.thought_id " .
+			         "  AND t2.thought_id = m2.thought_id " .
+			         "  AND t1.thought_id = $thoughtId " .
+			         "  AND t2.thought_id = $thoughtId " .
+			         "  AND k1.keyword < k2.keyword " .
+			         "ORDER BY cnt DESC " .
+			         "LIMIT 5 ";
 		}
 		else {
-			$query = SPARQL_PREFIXES .
-				"SELECT ?keyword1 ?keyword2 WHERE { " .
-				"  ?rel a thinklog:PairCount. " .
-				"  ?rel thinklog:keyword1 ?k1. " .
-				"  ?rel thinklog:keyword2 ?k2. " .
-				"  ?rel thinklog:count ?cnt. " .
-				"  ?k1 rdfs:label ?keyword1. " .
-				"  ?k2 rdfs:label ?keyword2. " .
-				"  FILTER(?keyword1 < ?keyword2). " .
-				"} " .
-				"ORDER BY DESC(?cnt) LIMIT 5 ";
+			$query = "SELECT DISTINCT k1.keyword, k2.keyword " .
+			         "FROM keywords k1, keywords k2, keyword_pair_count " .
+			         "WHERE k1.keyword_id = keyword_pair_count.keyword1 " .
+			         "  AND k2.keyword_id = keyword_pair_count.keyword2 " .
+			         "  AND k1.keyword < k2.keyword " .
+			         "ORDER BY cnt DESC " .
+			         "LIMIT 5 ";
 		}
-		$rows = $this->store->query($query, "rows");
+		$result = mysql_query($query);
 
-		// Get the keywords
+		// Get the keyword pairs
 		$keywordPairs = array();
-		foreach($rows as $row) {
+		while ($row = mysql_fetch_array($result)) {
 			$keywordPairs[$row["keyword1"]] = $row["keyword2"];
 		}
 

@@ -7,12 +7,11 @@ class ThoughtService
 {
 	// Thought cache
 	protected $thoughts = array();
-
-	protected $store;
+	protected $table = "thoughts";
+	protected $columns = "thought_id, thinker_id, content AS body, private, UNIX_TIMESTAMP(date) AS date";
 
 	public function __construct($services)
 	{
-		$this->store = $services->tripleStoreService->getStore();
 	}
 
 	//
@@ -32,30 +31,27 @@ class ThoughtService
 				return $this->thoughts[$id];
 			}
 
-			// Get the thought from the triple store
-			$query = SPARQL_PREFIXES .
-				"SELECT ?thoughtId ?thinkerId ?content ?private ?date " .
-				"WHERE { " .
-				"  ?thought thinklog:thoughtId \"$id\" ; " .
-				"           thinklog:thoughtId ?thoughtId ; " .
-				"           thinklog:author ?thinker ; " .
-				"           thinklog:content ?content ; " .
-				"           thinklog:private ?private ; " .
-				"           thinklog:date ?date . " .
-				"  ?thinker thinklog:thinkerId ?thinkerId . " .
-				"}";
-			$rows = $this->store->query($query, "rows");
-
-			if($rows && isset($rows[0]))
-			{
-				$thought = $this->getFromRow($rows[0]);
-
-				$this->thoughts[$id] = $thought;
-				return($thought);
+			// Get the thought from the database
+			$query = "SELECT $this->columns " .
+			         "FROM $this->table " .
+			         "WHERE thought_id = $id ";
+			$result = mysql_query($query);
+			if (!$result) {
+				return null;
 			}
+
+			$row = mysql_fetch_array($result);
+			if (!$row) {
+				return null;
+			}
+
+			$thought = $this->getFromRow($row);
+
+			$this->thoughts[$id] = $thought;
+			return $thought;
 		}
 
-		return(null);
+		return null;
 	}
 
 	//
@@ -67,66 +63,28 @@ class ThoughtService
 		$secure = (isset($login) && isset($thinkerId) && ($login->getThinkerId() == $thinkerId));
 		$owner = isset($thinkerId);
 
-		// Get newest thought from triple store that the logged in thinker is
+		// Get newest thought from database that the logged in thinker is
 		// allowed to see.
-
-		// Get newest date
-		$query = SPARQL_PREFIXES .
-			"SELECT MAX(?date) AS ?max " .
-			"WHERE { " .
-			"  ?thought thinklog:date ?date ; " .
-			"           thinklog:author ?thinker " .
-			( $secure ?
-				"" :
-				";      thinklog:private \"0\" "
-			) .
-			" . " .
-			"?thinker a thinklog:Thinker " .
-			( $owner ?
-				";    thinklog:thinkerId \"$thinkerId\" " :
-				""
-			) .
-			" . " .
-			"}";
-		$rows = $this->store->query($query, "rows");
-		if(!($rows && isset($rows[0])))
-		{
-			return(null);
+		$query = "SELECT $this->columns FROM $this->table " .
+		         "WHERE " .
+		         ($owner ? "thinker_id = '$thinkerId' " : " ") .
+		         (!$secure ? "AND NOT private " :
+		                     "AND ((NOT private) OR thinker_id='". mysql_real_escape_string($thinkerId) . "') ") .
+		         "ORDER BY date DESC " .
+		         "LIMIT 1";
+		$result = mysql_query($query);
+		if(!$result) {
+			return null;
 		}
-		$date = $rows[0]['max'];
 
-		// Get the thought with that date
-
-		$query = SPARQL_PREFIXES .
-			"SELECT ?thoughtId ?thinkerId ?content ?private ?date " .
-			"WHERE { " .
-			"  ?thought a thinklog:Thought ; " .
-			"           thinklog:date ?date ; " .
-			"           thinklog:author ?thinker ; " .
-			"           thinklog:content ?content ; " .
-			"           thinklog:thoughtId ?thoughtId ; " .
-			( $secure ?
-				"" :
-				"       thinklog:private \"0\" ; "
-			) .
-			"           thinklog:private ?private . " .
-			"  ?thinker a thinklog:Thinker ; " .
-			( $owner ?
-				"       thinklog:thinkerId \"$thinkerId\" ; " :
-				""
-			) .
-			"           thinklog:thinkerId ?thinkerId . " .
-			"  FILTER (?date >= \"$date\"). " .
-			"}";
-		$rows = $this->store->query($query, "rows");
-		if(!($rows && isset($rows[0])))
-		{
-			return(null);
+		$row = mysql_fetch_array($result);
+		if (!$row) {
+			return null;
 		}
-		$thought = $this->getFromRow($rows[0]);
+
+		$thought = $this->getFromRow($row);
 
 		$this->thoughts[$thought->getId()] = $thought;
-
 		return($thought);
 	}
 
@@ -134,58 +92,22 @@ class ThoughtService
 	// ------------------------ thought manipulation -----------------
 	//
 
-	//
-	// This function adds a thought to the thinklog with title $title,
-	// author $thinkerId, and body as being $body.
-	// $private is true if private, false if not. 
-	//
-
 	public function add(&$thought)
 	{
-		// Find the next thought Id
-		$query = SPARQL_PREFIXES .
-			"SELECT MAX(?thoughtId) AS ?max " .
-			"WHERE { " .
-			"  ?thought thinklog:thoughtId ?thoughtId ; " .
-			"}";
-		$rows = $this->store->query($query, "rows");
-		if(!($rows && isset($rows[0])))
-		{
-			$max = 0;
-		}
-		else
-		{
-			$max = $rows[0]['max'];
-		}
-
-		// Construct the thought
-		$thought->setId($thoughtId = $max + 1);
-		$thinkerId = $thought->getThinkerId();
-		$thought->setDate($date = date('U'));
-		$body = $thought->getBody();
-		$private = $thought->getPrivate() ? "1" : "0";
-
-		// Add the thought to the triple store
-		$query = SPARQL_PREFIXES .
-			"INSERT INTO <" . THINKLOG_GRAPH . "> CONSTRUCT { " .
-			"  _:thought_$thoughtId a thinklog:Thought ; " .
-			"                       thinklog:thoughtId \"$thoughtId\" ; " .
-			"                       thinklog:author ?thinker ; " .
-			"                       thinklog:date \"$date\" ; " .
-			"                       thinklog:content \"$body\" ; " .
-			"                       thinklog:private \"$private\" . " .
-			"} " .
-			"WHERE { " .
-			"  ?thinker thinklog:thinkerId \"$thinkerId\" . " .
-			"} ";
-
-		$result = $this->store->query($query, "raw");
-		if(($errs = $this->store->getErrors()))
-		{
+		// Add the thought to the database
+		$query = "INSERT INTO $this->table (thinker_id, content, private) " .
+		         "VALUES ( " .
+		         "'" . mysql_real_escape_string($thought->getThinkerId()) . "', " .
+		         "'" . mysql_real_escape_string($thought->getBody()) . "', " .
+		         mysql_real_escape_string($thought->getPrivate() ? "1" : "0") . ")";
+		$result = mysql_query($query); 
+		if($result) {
+			$thought->setId(mysql_insert_id());	// Get the ID!
+		} else {
 			return(false);
 		}
 
-		return($result ? true : false);
+		return(true);
 	}
 
 	//
@@ -211,9 +133,9 @@ class ThoughtService
 	function getFromRow($row)
 	{
 		$thought = new Thought();
-		$thought->setId($row['thoughtId']);
-		$thought->setThinkerId($row['thinkerId']);
-		$thought->setBody($row['content']);
+		$thought->setId($row['thought_id']);
+		$thought->setThinkerId($row['thinker_id']);
+		$thought->setBody($row['body']);
 		$thought->setPrivate($row['private'] ? true : false);
 		$thought->setDate($row['date']);
 

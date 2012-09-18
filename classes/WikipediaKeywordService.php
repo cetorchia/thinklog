@@ -4,7 +4,6 @@
 
 class WikipediaKeywordService
 {
-	protected $store;
 	protected $keywordService;
 	protected $timerService;
 	protected $queryService;
@@ -13,7 +12,6 @@ class WikipediaKeywordService
 	function __construct($services)
 	{
 		// Get context
-		$this->store = $services->tripleStoreService->getStore();
 		$this->keywordService = $services->keywordService;
 		$this->timerService = $services->timerService;
 		$this->thoughtService = $services->thoughtService;

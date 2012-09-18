@@ -25,16 +25,13 @@ $commonKeywordService = $services->commonKeywordService;
 $wikipediaKeywordService = $services->wikipediaKeywordService;
 $mentionsService = $services->mentionsService;
 $relatedKeywordService = $services->relatedKeywordService;
-$tripleStoreService = $services->tripleStoreService;
-$store = $tripleStoreService->getStore();
 
 // Stop it from killing itself if it runs too long
 set_time_limit(0);
 
-/*
- * Update schema
- */
-$tripleStoreService->loadSchema();
+// Connect to the database
+$dbConnectionService = new DBConnectionService($services);
+$dbConnectionService->connect();
 
 /*
  * Triplify each thought
@@ -46,6 +43,7 @@ $tripleStoreService->loadSchema();
 //
 
 $commonKeywordService->update();
+
 $wikipediaKeywordService->update();	// TODO: really slow
 
 //

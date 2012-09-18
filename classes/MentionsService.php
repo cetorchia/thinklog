@@ -4,7 +4,6 @@
 
 class MentionsService
 {
-	protected $store;
 	protected $keywordService;
 	protected $timerService;
 	protected $queryService;
@@ -13,7 +12,6 @@ class MentionsService
 	function __construct($services)
 	{
 		// Get context
-		$this->store = $services->tripleStoreService->getStore();
 		$this->keywordService = $services->keywordService;
 		$this->timerService = $services->timerService;
 		$this->thoughtService = $services->thoughtService;
@@ -67,6 +65,7 @@ class MentionsService
 
 	function mentions($thought,$doEcho = false)
 	{
+		$thoughtId = $thought->getId();
 		$keywords = $this->keywordService->getKeywords($thought->getBody());
 
 		// Add the keywords to the DB if necessary
@@ -79,17 +78,13 @@ class MentionsService
 			}
 		}
 
-		// Add triples for the thought mentioning each of these keywords.
-		$query = SPARQL_PREFIXES .
-		         "INSERT INTO <" . THINKLOG_GRAPH . "> " .
-		         "CONSTRUCT { " .
-		         "  ?thought thinklog:mentions ?keyword. " .
-		         "} " .
-		         "WHERE { " .
-		         "  ?thought thinklog:thoughtId \"" . $thought->getId() . "\". " .
-		         "  ?keyword rdfs:label ?k. " .
-		            $this->keywordService->getKeywordsFilter("?k",$keywords) .
-		         "} ";
-		$this->store->query($query,"raw");
+		// Add records for the thought mentioning each of these keywords.
+		$query = "INSERT INTO mentions (thought_id, keyword_id) " .
+		         "SELECT $thoughtId, keyword_id FROM keywords " .
+		         "WHERE keyword IN (" . $this->keywordService->getKeywordsSQL($keywords) .")";
+		if (!mysql_query($query)) {
+			echo "  warning: could not add mentions for thought $thoughtId:\n";
+			echo "           " . mysql_error() . "\n";
+		}
 	}
 }

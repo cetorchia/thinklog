@@ -21,26 +21,36 @@ create table if not exists thoughts (
 
 create table if not exists keywords (
 	keyword_id integer primary key auto_increment,
-	keyword varchar(128)
+	keyword varchar(128),
+	UNIQUE (keyword)
 );
+
+create table if not exists mentions (
+	thought_id integer,
+	keyword_id integer,
+	UNIQUE (thought_id, keyword_id)
+);
+
+create or replace view keyword_count
+as select keyword_id, count(thought_id) as cnt
+   from mentions
+   group by keyword_id
+;
+
+create or replace view keyword_pair_count
+as select m1.keyword_id as keyword1, m2.keyword_id as keyword2,
+          count(m1.thought_id) as cnt
+   from mentions m1, mentions m2
+   where m1.thought_id = m2.thought_id
+     and m1.keyword_id <> m2.keyword_id
+   group by m1.keyword_id, m2.keyword_id;
 
 create table if not exists common_keywords (
 	keyword_id integer primary key
 );
 
-create table if not exists mentions (
-	thought_id integer,
-	keyword_id integer
-);
-
 create table if not exists related_keywords (
 	keyword1 integer,
-	keyword2 integer
-);
-
-create table if not exists pair_counts (
-	keyword1 integer,
 	keyword2 integer,
-	count integer
+	UNIQUE (keyword1, keyword2)
 );
-

@@ -1,7 +1,6 @@
 <?php
 
 require_once(DOC_ROOT . "/classes/TimerService.php");
-require_once(DOC_ROOT . "/classes/TripleStoreService.php");
 require_once(DOC_ROOT . "/classes/FormatService.php");
 require_once(DOC_ROOT . "/classes/ThinkerService.php");
 require_once(DOC_ROOT . "/classes/ThoughtService.php");
@@ -25,7 +24,6 @@ class AppServices
 	public function __construct()
 	{
 		$this->timerService = new TimerService($this);
-		$this->tripleStoreService = new TripleStoreService($this);
 		$this->formatService = new FormatService($this);
 		$this->thinkerService = new ThinkerService($this);
 		$this->thoughtService = new ThoughtService($this);

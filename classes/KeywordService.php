@@ -5,13 +5,11 @@
 
 class KeywordService
 {
-	protected $store;
 	protected $keywords = array();
 
 	function __construct($services)
 	{
 		// Get context
-		$this->store = $services->tripleStoreService->getStore();
 	}
 
 	// Adds a keyword node with this label to the database
@@ -35,105 +33,13 @@ class KeywordService
 			$this->keywords[$keyword] = $keyword;
 		}
 
-		// Look to see if they are already in the knowledgebase
-		$query = SPARQL_PREFIXES .
-		         "SELECT ?k " .
-		         "WHERE { " .
-		         "  ?w a thinklog:Keyword. " .
-		         "  ?w rdfs:label ?k. " .
-		            $this->getKeywordsFilter("?k",$keywords) .
-		         "} ";
-		$rows = $this->store->query($query,"rows");
-
-		// Filter out the ones that are already there
-		foreach($rows as $row) {
-			unset($keywords[$row["k"]]);
-		}
-
-		// If any keywords are not in the cache and not in the kb, add them
-		if($keywords)
-		{
-			$query = SPARQL_PREFIXES .
-			         "INSERT INTO <" . THINKLOG_GRAPH . "> " .
-			         "CONSTRUCT { ";
-			foreach($keywords as $keyword)
-			{
-				$query .=
-			         " _:keyword_$keyword a thinklog:Keyword ; " .
-			         "                    rdfs:label \"$keyword\". ";
-			}
-			$query .= "} ";
-			echo "  adding these keywords\n";
-			$this->store->query($query,"raw");
-		}
-	}
-
-	function addKeywordCounts($counts)
-	{
-		foreach($counts as $keyword => $cnt)
-		{
-			// Delete the current count into the triplestore
-			$query = SPARQL_PREFIXES .
-				"DELETE FROM <" . THINKLOG_GRAPH . "> " .
-				"CONSTRUCT { " .
-				"  ?w thinklog:count ?cnt. " .
-				"} " .
-				"WHERE { " .
-				"  ?w a thinklog:Keyword. " .
-				"  ?w rdfs:label \"$keyword\". " .
-				"  ?w thinklog:count ?cnt. " .
-				"} ";
-			$this->store->query($query, "raw");
-
-			// Insert the count into the triplestore
-			$query = SPARQL_PREFIXES .
-				"INSERT INTO <" . THINKLOG_GRAPH . "> " .
-				"CONSTRUCT { " .
-				"  ?w thinklog:count \"$cnt\". " .
-				"} " .
-				"WHERE { " .
-				"  ?w a thinklog:Keyword. " .
-				"  ?w rdfs:label \"$keyword\". " .
-				"} ";
-			$this->store->query($query, "raw");
-		}
-	}
-
-	// Adds the words as common keywords
-	function addCommonKeywords($words)
-	{
-		foreach($words as $word)
-		{
-			// Insert them
-			$query = SPARQL_PREFIXES .
-			         "INSERT INTO <" . THINKLOG_GRAPH . "> " .
-			         "CONSTRUCT { " .
-			         "  ?w a thinklog:CommonKeyword. " .
-			         "} " .
-			         "WHERE { " .
-			         "  ?w a thinklog:Keyword. " .
-			         "  ?w rdfs:label \"$word\". " .
-			         " } ";
-			$this->store->query($query,"raw");
-		}
-	}
-
-	// Removes words that are already common keywords from the given set
-	function removeCommonKeywords(&$words)
-	{
-		foreach($words as $word)
-		{
-			echo "  Looking up $word\n";
-			$query = SPARQL_PREFIXES .
-				"SELECT ?k WHERE { ?w a thinklog:CommonKeyword; rdfs:label ?k. " .
-				"  FILTER(?k = \"$word\"). " .
-				" } ";
-			$rows = $this->store->query($query,"rows");
-			foreach($rows as $row) {
-				$word = $row["k"];
-				echo "  $word is already a common keyword\n";
-				unset($words[$word]);
-			}
+		// Try to put the so-far unseen keywords in the database
+		$query = "INSERT INTO keywords (keyword) " .
+		         "VALUES " . $this->getKeywordTuplesSQL($keywords);
+		echo "  adding these keywords\n";
+		if (!mysql_query($query)) {
+			echo "  warning: could not add keywords ".$this->getKeywordsSQL($keywords).": "; 
+			echo "           " . mysql_error() . "\n";
 		}
 	}
 
@@ -167,41 +73,56 @@ class KeywordService
 	function getCommonKeywords($words,&$keywords)
 	{
 		// Look these words up in the kb, and return their count
-		$query = SPARQL_PREFIXES .
-		         "SELECT ?k WHERE { " .
-		         "  ?w a thinklog:CommonKeyword. " .
-		         "  ?w rdfs:label ?k. " .
-		            $this->getKeywordsFilter("?k",$words) .
-		         "} " .
-		         "GROUP BY ?k ";
-		$rows = $this->store->query($query,"rows");
-		foreach($rows as $row)
-		{
-			$word = $row["k"];
+		$query = "SELECT keyword FROM common_keywords, keywords " .
+		         "WHERE keywords.keyword_id = common_keywords.keyword_id " .
+		         "  AND keyword IN (" . $this->getKeywordsSQL($words) . ")";
+		$result = mysql_query($query);
+		while ($row = mysql_fetch_array($result)) {
+			$word = $row["keyword"];
 			$keywords[$word] = $word;
 			$this->keywords[$word] = $word;
 			echo "  $word is a common keyword\n";
 		}
 	}
 
-	// Returns a SPARQL filter for letting variable $k be equal to
-	// one of the keywords.
-	function getKeywordsFilter($k,$keywords)
-	{
-		$filter = "FILTER(";
-		$first = true;
-		foreach($keywords as $keyword)
-		{
-			if($first) {
-				$first = false;
-			}
-			else {
-				$filter .= " || ";
-			}
-			$filter .= "$k = \"$keyword\"";
+	// Removes common keywords from these words
+	function removeCommonKeywords(&$words) {
+		
+		$commonKeywords = array();
+		$this->getCommonKeywords($words, $commonKeywords);
+		foreach ($commonKeywords as $keyword) {
+			unset($words[$keyword]);
 		}
-		$filter .= ") ";
-		return($filter);
+	}
+
+	// Returns the list of keywords as a string of the form "('keyword1'), ('keyword2'), ..."
+	function getKeywordTuplesSQL($keywords) {
+		$first = true;
+		$output = "";
+		foreach ($keywords as $keyword) {
+			if ($first) {
+				$output = "('$keyword')";
+				$first = false;
+			} else {
+				$output .= ", ('$keyword')";
+			}
+		}
+		return $output;
+	}
+
+	// Returns the list of keywords as a string of the form "'keyword1', 'keyword2', ..."
+	function getKeywordsSQL($keywords) {
+		$first = true;
+		$output = "";
+		foreach ($keywords as $keyword) {
+			if ($first) {
+				$output = "'$keyword'";
+				$first = false;
+			} else {
+				$output .= ", '$keyword'";
+			}
+		}
+		return $output;
 	}
 
 	// Splits the thought text up into lowercase PHRASES (words)

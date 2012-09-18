@@ -6,14 +6,10 @@ require_once(DOC_ROOT . "/classes/Thinker.php");
 class ThinkerService
 {
 	protected $table = "thinkers";		// Table name
-
 	protected $thinkers = array();		// Thinker data cache
-
-	protected $store;					// Access to RDF triple store
 
 	public function __construct($services)
 	{
-		$this->store = $services->tripleStoreService->getStore();
 	}
 
 	//
@@ -31,19 +27,13 @@ class ThinkerService
 				return $this->thinkers[$thinkerId];
 			}
 
-			// Get other info from triple store
-			$rows = $this->store->query(SPARQL_PREFIXES .
-				"SELECT ?name ?about " .
-				"WHERE { ".
-				"  ?thinker thinklog:thinkerId \"$thinkerId\" ; " .
-				"           thinklog:about ?about ; " .
-				"           thinklog:name ?name . " .
-				"}",
-			"rows");
+			// Retrieve info from DB
+			$query = "SELECT thinker_id, about, name FROM $this->table " .
+			         "WHERE thinker_id = '".mysql_real_escape_string($thinkerId)."' ";
+			$result = mysql_query($query); 
 
-			if($rows && isset($rows[0]))
+			if($result && ($row = mysql_fetch_array($result)))
 			{
-				$row = $rows[0];
 				$thinker = new Thinker();
 				$thinker->setId($thinkerId);
 				$thinker->setName($row['name']);
@@ -125,28 +115,14 @@ class ThinkerService
 		}
 
 		// Put Id/password into database
-		$query="INSERT INTO " . $this->table . " (thinker_id,password) " .
+		$query="INSERT INTO " . $this->table . " (thinker_id,password,about,name) " .
 		       "VALUES ('" . mysql_real_escape_string($thinkerId) . "', " .
-		               "'" . mysql_real_escape_string($password) . "'" .
+		               "'" . mysql_real_escape_string($password) . "'," .
+		               "'" . mysql_real_escape_string($about) . "'," .
+		               "'" . mysql_real_escape_string($name) . "'" .
 		                ")";
 		if(!mysql_query($query))
 		{
-			return(false);
-		}
-
-		// Insert user info into Thinklog triple store
-		$query = SPARQL_PREFIXES .
-			"INSERT INTO <" . THINKLOG_GRAPH . "> { " .
-			"  _:thinker_$thinkerId a thinklog:Thinker ; " .
-			"           thinklog:thinkerId \"$thinkerId\" ; " .
-			"           thinklog:about \"$about\" ; " .
-			"           thinklog:name \"$name\" . " .
-			"}";
-		if(!$this->store->query($query,"raw"))
-		{
-			echo "<pre>\n";
-			var_dump($this->store->getErrors());
-			echo "</pre>\n";
 			return(false);
 		}
 
