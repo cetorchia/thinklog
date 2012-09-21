@@ -105,7 +105,7 @@ class QueryService
 		         "           rk.keyword IN (" .
 		         $this->keywordService->getKeywordsSQL($words) ."))) " .
 		         "GROUP BY t.thought_id " .
-		         "ORDER BY COUNT(DISTINCT mk.keyword_id), COUNT(DISTINCT rk.keyword_id) DESC " .
+		         "ORDER BY COUNT(DISTINCT mk.keyword_id) DESC, COUNT(DISTINCT rk.keyword_id) DESC " .
 		         "LIMIT ".($num+1)." OFFSET $start ";
 		return mysql_query($query);
 	}
