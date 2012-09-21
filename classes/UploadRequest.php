@@ -115,16 +115,15 @@ class UploadRequest
 
 	function doAdd()
 	{
-		return($this->addThought($this->body,$this->private));
+		return $this->addThought($this->body,$this->private);
 	}
 
 	// Reads the file and loads the thoughts into the DB
 
 	function doUpload()
 	{
-		$doc = new DOMDocument("1.0");
-		$doc->load($this->filename);		// Load XML from the temp file
-		return($this->addThoughts($doc));	// Parse the XML and add the thoughts
+		$data = file_get_contents($this->filename);
+		return $this->addThoughts($data);
 	}
 
 	// Reads from the URL and loads the thoughts into the DB
@@ -132,25 +131,53 @@ class UploadRequest
 	function doFromURL()
 	{
 		// Get XML from URL
-		$dataLength = strlen($data);
 		$opts = array("http" => array(
 			"method"  => "GET",
 			"header"  => "User-Agent: Thinklog\r\n",
 		));
 		$context = stream_context_create($opts);
-		$xml = file_get_contents($this->url,false,$context);
+		$data = file_get_contents($this->url,false,$context);
+		return $this->addThoughts($data);
+	}
 
+	// Parses a thoughts file and adds the thoughts
+	function addThoughts($data) {
 		// Extract thoughts from response
-		$doc = new DOMDocument();
-		$doc->loadXML($xml);
-		return($this->addThoughts($doc));				// Parse the XML and add the thoughts
+		if (substr(trim($data),0,1) == '{') {
+			// It's JSON
+			return $this->addThoughtsFromJSON($data);
+		} else {
+			// Probably XML/RSS
+			$doc = new DOMDocument();
+			$doc->loadXML($data);
+			return $this->addThoughtsFromXML($doc);  // Parse the XML and add the thoughts
+		}
+	}
+
+	//
+	// Parses JSON to add a series of thoughts
+	// Input: plain text
+	//
+	function addThoughtsFromJSON($data) {
+		$response = json_decode($data, true);
+		$results = $response["results"];
+		$itWorked = true;
+
+		foreach ($results as $item) {
+			$thinkerId = isset($item["from_user"]) ? $item["from_user"] : null;
+			$body = isset($item["text"]) ? $item["text"] : null;
+			$private = false;
+			$itWorked = $itWorked && $this->addThought($body, $private, $thinkerId);
+		}
+
+		return $itWorked;
 	}
 
 	//
 	// Parses XML to add a series of thoughts
 	// Input: a loaded DOMDocument object
 	//
-	function addThoughts($doc)
+	function addThoughtsFromXML($doc)
 	{
 		$itWorked = true;
 
@@ -159,7 +186,7 @@ class UploadRequest
 		foreach($thoughtElements as $thoughtElement)
 		{
 			$body = null;
-			$private = null;
+			$private = false;
 			$thinkerId = null;
 			foreach($thoughtElement->childNodes as $child)
 			{
@@ -182,7 +209,7 @@ class UploadRequest
 			$itWorked = $itWorked && $this->addThought($body, $private, $thinkerId);
 		}
 
-		return($itWorked);
+		return $itWorked;
 	}
 
 	// Asks ThoughtService to add the thought with this body/private-ness
@@ -199,7 +226,7 @@ class UploadRequest
 			if(strlen($body) > MAX_BODY_LENGTH)
 			{
 				header('Location: ./?think&tooLong');
-				return(false);
+				return false;
 			}
 
 			else
@@ -217,12 +244,12 @@ class UploadRequest
 				if($this->thoughtService->add($thought))
 				{
 					$this->mentionsService->mentions($thought);	// Tag keywords
-					return(true);
+					return true;
 				}
 			}
 		}
 
 		header('Location: ./?think&error');
-		return(false);
+		return false;
 	}
 }
