@@ -37,26 +37,44 @@ class TagCloudSection extends Section
 		$title2 = isset($thoughtId) ? " for this thought" : "";
 
 		// Render keywords
-		$par = new Paragraph();
-		$par->addContent("${title1}keywords${title2}: ");
-		foreach($keywords as $keyword)
-		{
-			$link = new Anchor($formatService->getQueryURL($keyword),$keyword);
-			$par->addContent($link." ");
+		if ($keywords) {
+			$par = new Paragraph();
+			$par->addContent("${title1}Keywords${title2}: ");
+			foreach($keywords as $keyword)
+			{
+				$link = new Anchor($formatService->getQueryURL($keyword),$keyword);
+				$par->addContent($link." ");
+			}
+			$output .= $par;
 		}
-		$output .= $par;
 
 		// Render keyword pairs
-		$par = new Paragraph();
-		$par->addContent("${title1}keyword pairs${title2}: ");
-		foreach($keywordPairs as $keyword1 => $keyword2)
-		{
-			$link1 = new Anchor($formatService->getQueryURL($keyword1),$keyword1);
-			$link2 = new Anchor($formatService->getQueryURL($keyword2),$keyword2);
-			$par->addContent("(".$link1.", ".$link2.") ");
+		if ($keywordPairs) {
+			$par = new Paragraph();
+			$par->addContent("${title1}Keyword Pairs${title2}: ");
+			foreach($keywordPairs as $keywordPair)
+			{
+				$keyword1 = $keywordPair[0];
+				$keyword2 = $keywordPair[1];
+				$link1 = new Anchor($formatService->getQueryURL($keyword1),$keyword1);
+				$link2 = new Anchor($formatService->getQueryURL($keyword2),$keyword2);
+				$par->addContent("(".$link1." ".$link2.") ");
+			}
+			$output .= $par;
 		}
-		$output .= $par;
 
 		return $output;
+	}
+
+	public function draw()
+	{
+		$div = new Div();
+		$content = $this->getContent();
+		if (!$content) {
+			return "";
+		}
+		$div->setContent($content);
+		$div->set("class", "section");
+		return $div;
 	}
 }

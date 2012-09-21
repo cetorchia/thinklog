@@ -41,6 +41,7 @@ class TagCloudService
 		else {
 			$query = "SELECT DISTINCT keyword " .
 			         "FROM keywords, keyword_count " .
+			         "WHERE keywords.keyword_id = keyword_count.keyword_id " .
 			         "ORDER BY cnt DESC " .
 			         "LIMIT 5 ";
 		}
@@ -49,7 +50,7 @@ class TagCloudService
 		// Get the keywords
 		$keywords = array();
 		while ($row = mysql_fetch_array($result)) {
-			$keywords[$row["keyword"]] = $row["keyword"];
+			$keywords[] = $row["keyword"];
 		}
 
 		return($keywords);
@@ -57,12 +58,13 @@ class TagCloudService
 
 	//
 	// Returns the most common keyword pairs
+	// @return An array of two-element arrays
 	//
 	function getKeywordPairs($thinkerId, $thoughtId)
 	{
 		// Query for keyword pairs related to this thought and thinker
 		if($thinkerId) {
-			$query = "SELECT DISTINCT k1.keyword, k2.keyword " .
+			$query = "SELECT DISTINCT k1.keyword as kw1, k2.keyword as kw2 " .
 			         "FROM keywords k1, keywords k2, keyword_pair_count, " .
 			         "     mentions m1, mentions m2, thoughts t1, thoughts t2 " .
 			         "WHERE k1.keyword_id = keyword_pair_count.keyword1 " .
@@ -78,7 +80,7 @@ class TagCloudService
 			         "LIMIT 5 ";
 		}
 		else if($thoughtId) {
-			$query = "SELECT DISTINCT k1.keyword, k2.keyword " .
+			$query = "SELECT DISTINCT k1.keyword as kw1, k2.keyword as kw2 " .
 			         "FROM keywords k1, keywords k2, keyword_pair_count, " .
 			         "     mentions m1, mentions m2, thoughts t1, thoughts t2 " .
 			         "WHERE k1.keyword_id = keyword_pair_count.keyword1 " .
@@ -94,7 +96,7 @@ class TagCloudService
 			         "LIMIT 5 ";
 		}
 		else {
-			$query = "SELECT DISTINCT k1.keyword, k2.keyword " .
+			$query = "SELECT DISTINCT k1.keyword as kw1, k2.keyword as kw2 " .
 			         "FROM keywords k1, keywords k2, keyword_pair_count " .
 			         "WHERE k1.keyword_id = keyword_pair_count.keyword1 " .
 			         "  AND k2.keyword_id = keyword_pair_count.keyword2 " .
@@ -107,7 +109,8 @@ class TagCloudService
 		// Get the keyword pairs
 		$keywordPairs = array();
 		while ($row = mysql_fetch_array($result)) {
-			$keywordPairs[$row["keyword1"]] = $row["keyword2"];
+			
+			$keywordPairs[] = array($row["kw1"], $row["kw2"]);
 		}
 
 		return($keywordPairs);
