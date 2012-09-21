@@ -203,7 +203,7 @@ class UploadRequest
 
 				$thought = new Thought();
 				$thought->setThinkerId($this->login->getThinkerId());
-				$thought->setBody(mysql_real_escape_string($body));
+				$thought->setBody($body);
 				$thought->setPrivate(isset($private)?$private:false);
 
 				if($this->thoughtService->add($thought))
