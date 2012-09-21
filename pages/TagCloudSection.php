@@ -56,9 +56,9 @@ class TagCloudSection extends Section
 			{
 				$keyword1 = $keywordPair[0];
 				$keyword2 = $keywordPair[1];
-				$link1 = new Anchor($formatService->getQueryURL($keyword1),$keyword1);
-				$link2 = new Anchor($formatService->getQueryURL($keyword2),$keyword2);
-				$par->addContent("(".$link1." ".$link2.") ");
+				$link = new Anchor($formatService->getQueryURL("$keyword1 $keyword2"),
+				                   "$keyword1 - $keyword2");
+				$par->addContent("$link &nbsp; ");
 			}
 			$output .= $par;
 		}
