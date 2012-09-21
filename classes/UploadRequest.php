@@ -158,6 +158,9 @@ class UploadRequest
 			$thoughtElements = $doc->getElementsByTagName("item");
 		foreach($thoughtElements as $thoughtElement)
 		{
+			$body = null;
+			$private = null;
+			$thinkerId = null;
 			foreach($thoughtElement->childNodes as $child)
 			{
 				if(($child->nodeName == "body") ||
@@ -170,9 +173,13 @@ class UploadRequest
 				{
 					$private = ($child->nodeValue == "0") ? false : true;
 				}
+				else if($child->nodeName == "author")
+				{
+					$thinkerId = htmlspecialchars_decode(strip_tags($child->textContent));
+				}
 			}
 
-			$itWorked = $itWorked && $this->addThought($body, $private);
+			$itWorked = $itWorked && $this->addThought($body, $private, $thinkerId);
 		}
 
 		return($itWorked);
@@ -182,7 +189,7 @@ class UploadRequest
 	//
 	// ** Aborts if any error is found.
 
-	function addThought($body,$private)
+	function addThought($body,$private,$thinkerId=null)
 	{
 		// Try to add the thought
 		if($body)
@@ -202,7 +209,8 @@ class UploadRequest
 				 */
 
 				$thought = new Thought();
-				$thought->setThinkerId($this->login->getThinkerId());
+				$thought->setThinkerId($thinkerId ? $thinkerId :
+				                                    $this->login->getThinkerId());
 				$thought->setBody($body);
 				$thought->setPrivate(isset($private)?$private:false);
 
