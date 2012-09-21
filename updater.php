@@ -1,19 +1,14 @@
 <?php
 
 //
-// Background process that updates thought triples
+// Background process that updates knowledge about thoughts
+// periodically, particularly about thought keywords.
 //
 
 require_once("def.php");
 require_once("error.php");
 require_once(DOC_ROOT . "/classes/AppServices.php");
 require_once(DOC_ROOT . "/classes/DBConnectionService.php");
-require_once(DOC_ROOT . "/classes/LoginRequest.php");
-require_once(DOC_ROOT . "/classes/DocumentRequest.php");
-require_once(DOC_ROOT . "/classes/LogoutRequest.php");
-require_once(DOC_ROOT . "/classes/LoginService.php");
-require_once(DOC_ROOT . "/classes/UploadRequest.php");
-require_once(DOC_ROOT . "/classes/ServerRequest.php");
 
 /*
  * Set up application context
@@ -22,7 +17,6 @@ require_once(DOC_ROOT . "/classes/ServerRequest.php");
 $services = new AppServices();
 $timerService = $services->timerService;
 $commonKeywordService = $services->commonKeywordService;
-$wikipediaKeywordService = $services->wikipediaKeywordService;
 $mentionsService = $services->mentionsService;
 $relatedKeywordService = $services->relatedKeywordService;
 
@@ -33,18 +27,11 @@ set_time_limit(0);
 $dbConnectionService = new DBConnectionService($services);
 $dbConnectionService->connect();
 
-/*
- * Triplify each thought
- */
-
 //
-// Update knowledgebase for keyword counts, and for 
-// any keywords that have become common.
+// Update knowledgebase for for any keywords that have become common.
 //
 
 $commonKeywordService->update();
-
-$wikipediaKeywordService->update();	// TODO: really slow
 
 //
 // Update knowledgebase for any keywords thoughts mention

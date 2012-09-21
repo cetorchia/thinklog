@@ -1,6 +1,7 @@
 <?php
 
-// For managing keyword triples
+// For rescanning thoughts for keywords after new keywords
+// have turned up in the knowledgebase
 
 class MentionsService
 {
@@ -20,6 +21,10 @@ class MentionsService
 
 	//
 	// Update knowledgebase for any keywords thoughts mention
+	// Keywords were extracted when thoughts were created, but
+	// more keywords probably have come into existence. Better
+	// check the old thoughts for these new keywords and tell
+	// the knowledgebase about them.
 	//
 
 	function update()
@@ -31,32 +36,33 @@ class MentionsService
 			// Retrieve thoughts
 			//
 			$this->timerService->start('query');
-			$rows = $this->queryService->getAllThoughts($offset, $num);
+			$result = $this->queryService->getAllThoughts($offset, $num);
 			echo "Retrieved thoughts in " . $this->timerService->read('query') . " seconds\n";
 
 			//
-			// Triplify mentions for these thoughts
+			// Try to get previously unseen "mentions" for these thoughts
 			//
 			$n = 0;
-			foreach($rows as $row)
-			{
-				$n = $n + 1; if($n > $num) break;
+			while ($row = mysql_fetch_array($result)) {
+				$n = $n + 1;
+				if ($n > $num)
+					break;
 
 				// Retrieve thought data
 				$thought = $this->thoughtService->getFromRow($row);
 				echo "Thought: " . $thought->getId() . " (" . date("r",$thought->getDate()) . ")\n";
 				echo "  \"".$thought->getBody()."\"\n";
 
-				// Triplify it
+				// Search for mentions
 				$this->timerService->start('query');
 				$this->mentions($thought,true);
-				echo "  mentions triplified in " . $this->timerService->read('query') . " seconds\n";
+				echo "  mentions updated in " . $this->timerService->read('query') . " seconds\n";
 			}
 
 			usleep(100000);				// One tenth of a second
 			$offset = $offset + $num;
 
-		} while(count($rows) > $num);
+		} while($n > $num);
 	}
 
 	//
@@ -67,6 +73,8 @@ class MentionsService
 	{
 		$thoughtId = $thought->getId();
 		$keywords = $this->keywordService->getKeywords($thought->getBody());
+		if (!$keywords)
+			return;
 
 		// Add the keywords to the DB if necessary
 		$this->keywordService->addKeywords($keywords);
@@ -83,8 +91,7 @@ class MentionsService
 		         "SELECT $thoughtId, keyword_id FROM keywords " .
 		         "WHERE keyword IN (" . $this->keywordService->getKeywordsSQL($keywords) .")";
 		if (!mysql_query($query)) {
-			echo "  warning: could not add mentions for thought $thoughtId:\n";
-			echo "           " . mysql_error() . "\n";
+			echo "  warning: " . mysql_error() . "\n";
 		}
 	}
 }

@@ -6,7 +6,6 @@ require_once(DOC_ROOT . "/classes/ThinkerService.php");
 require_once(DOC_ROOT . "/classes/ThoughtService.php");
 require_once(DOC_ROOT . "/classes/KeywordService.php");
 require_once(DOC_ROOT . "/classes/CommonKeywordService.php");
-require_once(DOC_ROOT . "/classes/WikipediaKeywordService.php");
 require_once(DOC_ROOT . "/classes/MentionsService.php");
 require_once(DOC_ROOT . "/classes/RelatedKeywordService.php");
 require_once(DOC_ROOT . "/classes/QueryService.php");
@@ -30,7 +29,6 @@ class AppServices
 		$this->keywordService = new KeywordService($this);
 		$this->queryService = new QueryService($this);
 		$this->commonKeywordService = new CommonKeywordService($this);
-		$this->wikipediaKeywordService = new WikipediaKeywordService($this);
 		$this->mentionsService = new MentionsService($this);
 		$this->relatedKeywordService = new RelatedKeywordService($this);
 		$this->tagCloudService = new TagCloudService($this);

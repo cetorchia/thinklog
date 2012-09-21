@@ -38,7 +38,7 @@ class KeywordService
 		         "VALUES " . $this->getKeywordTuplesSQL($keywords);
 		echo "  adding these keywords\n";
 		if (!mysql_query($query)) {
-			echo "  warning: could not add keywords ".$this->getKeywordsSQL($keywords).": "; 
+			echo "  warning: could not add keywords ".$this->getKeywordsSQL($keywords).": \n"; 
 			echo "           " . mysql_error() . "\n";
 		}
 	}
