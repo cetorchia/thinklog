@@ -74,8 +74,8 @@ class MenuSection extends Section
 					"My Thinklog"
 			)));
 			$linksDiv->addContent(new Paragraph(new Anchor(
-					$formatService->getUploadURL(),
-					"Upload thoughts"
+					$formatService->getAddURL(),
+					"Add thoughts"
 			)));
 			$linksDiv->addContent(new Paragraph(new Anchor(
 					$formatService->getLogoutURL(),

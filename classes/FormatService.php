@@ -55,12 +55,6 @@ class FormatService
 		return THINKLOG_URL . "?add";
 	}
 
-	// Get the Thinklog URL that will take you to the upload page
-	public function getUploadURL()
-	{
-		return THINKLOG_URL . "?upload";
-	}
-
 	// Get the Thinklog URL that will take you to the query page
 	public function getQueryPageURL()
 	{

@@ -11,15 +11,15 @@ require_once(DOC_ROOT . "/classes/ThoughtService.php");
 // thoughts from various sources.
 //
 
-class UploadRequest
+class AddRequest
 {
 	protected $isRequested;		// if we have anything to do
 
 	// For uploading file
-	protected $upload;
+	protected $fromFile;
 	protected $filename;
 
-	// For uploading from URL
+	// For add thoughts in a URL
 	protected $fromURL;
 	protected $url;
 
@@ -41,12 +41,12 @@ class UploadRequest
 		$POST = $serverRequest->getPOST();
 
 		// For uploading from file
-		$this->upload = isset($POST["upload"]) && ($POST["upload"] == "1");
+		$this->fromFile = isset($POST["fromFile"]) && ($POST["fromFile"] == "1");
 		$this->filename = $serverRequest->getFile("file");
 
-		// For uploading from URL
+		// For retrieving from URL
 		$this->fromURL = isset($POST["fromURL"]) && ($POST["fromURL"] == "1")
-		                 && preg_match('/^http\:\/\//',$POST["url"]);
+		                       && preg_match('/^http\:\/\//', $POST["url"]);
 		$this->url = isset($POST["url"]) ? $POST["url"] : null;
 
 		// For adding one thought
@@ -54,8 +54,8 @@ class UploadRequest
 		$this->body = isset($POST["body"]) ? $POST["body"] : "";
 		$this->private = isset($POST["private"]) && ($POST["private"] == '1') ? '1' : '0';
 
-		// For adding any thought
-		$this->isRequested = $this->add || $this->upload || $this->fromURL;
+		// For adding thought in any way
+		$this->isRequested = $this->add || $this->fromFile || $this->fromURL;
 
 		// Access to services
 		$this->thinkerService = $services->thinkerService;
@@ -66,11 +66,11 @@ class UploadRequest
 	}
 
 	//
-	// Sees if the POST-DATA is requesting to upload thoughts,
-	// or add one thought. If it is, then try to upload them.
+	// Sees if the POST data is requesting to upload thoughts,
+	// or add one thought. If it is, then try to add them.
 	//
 	// This script must be run before any output occurs, because
-	// it changes the HTTP header in order to refresh to the home
+	// it changes the HTTP header in order to redirect to the home
 	// page.
 	//
 
@@ -81,19 +81,19 @@ class UploadRequest
 			// Only post if we can verify the login thinker id and password!!
 			if($this->thinkerService->verifyLogin($this->login)) {
 
-				// Upload one thought
+				// Add one thought
 				if($this->add)
 				{
 					$this->doAdd();
 				}
 
 				// Upload thoughts from file
-				else if($this->upload)
+				else if($this->fromFile)
 				{
-					$this->doUpload();
+					$this->doFromFile();
 				}
 
-				// Upload thoughts from URL
+				// Retrieve thoughts from URL
 				else if($this->fromURL)
 				{
 					$this->doFromURL();
@@ -112,7 +112,7 @@ class UploadRequest
 		}
 	}
 
-	// Upload one thought from the POST-DATA
+	// Add one thought from the POST data
 
 	function doAdd()
 	{
@@ -121,13 +121,13 @@ class UploadRequest
 
 	// Reads the file and loads the thoughts into the DB
 
-	function doUpload()
+	function doFromFile()
 	{
 		$data = file_get_contents($this->filename);
 		return $this->addThoughts($data);
 	}
 
-	// Reads from the URL and loads the thoughts into the DB
+	// Retrieves thoughts from the URL and loads the thoughts into the DB
 
 	function doFromURL()
 	{
@@ -177,7 +177,7 @@ class UploadRequest
 		$itWorked = true;
 
 		// Get the thoughts from the XML
-			$thoughtElements = $doc->getElementsByTagName("item");
+		$thoughtElements = $doc->getElementsByTagName("item");
 		foreach($thoughtElements as $thoughtElement)
 		{
 			$body = null;

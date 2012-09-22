@@ -8,7 +8,7 @@ require_once(DOC_ROOT . "/classes/LoginRequest.php");
 require_once(DOC_ROOT . "/classes/DocumentRequest.php");
 require_once(DOC_ROOT . "/classes/LogoutRequest.php");
 require_once(DOC_ROOT . "/classes/LoginService.php");
-require_once(DOC_ROOT . "/classes/UploadRequest.php");
+require_once(DOC_ROOT . "/classes/AddRequest.php");
 require_once(DOC_ROOT . "/classes/ServerRequest.php");
 
 /*
@@ -40,9 +40,9 @@ $logoutRequest->execute();
 // Get current login
 $login = $loginService->getLogin($serverRequest);
 
-// Check if we need to add a thot, or upload thoughts
-$uploadRequest = new UploadRequest($serverRequest, $services, $login);
-$uploadRequest->execute();
+// Check if we need to add thoughts
+$addRequest = new AddRequest($serverRequest, $services, $login);
+$addRequest->execute();
 
 // Now write the appropriate document.
 $documentRequest = new DocumentRequest($serverRequest, $services, $login);

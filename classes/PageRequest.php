@@ -4,7 +4,7 @@ require_once(DOC_ROOT . "/pages/ThoughtPage.php");
 require_once(DOC_ROOT . "/pages/ResultsPage.php");
 require_once(DOC_ROOT . "/pages/QueryPage.php");
 require_once(DOC_ROOT . "/pages/SignupPage.php");
-require_once(DOC_ROOT . "/pages/UploadPage.php");
+require_once(DOC_ROOT . "/pages/AddPage.php");
 require_once(DOC_ROOT . "/pages/LoginPage.php");
 
 /**
@@ -32,7 +32,7 @@ class PageRequest
 		$this->query = isset($GET['q']);
 		$this->queryPage = isset($GET['query']);
 		$this->signup = isset($GET['signup']);
-		$this->upload = isset($GET['upload']);
+		$this->addPage = isset($GET['add']);
 		$this->isLogin = isset($GET['login']);
 
 		$this->serverRequest = $serverRequest;
@@ -78,9 +78,9 @@ class PageRequest
 			$page = new LoginPage($this->serverRequest, $this->services, $this->login);
 		}
 
-		else if($this->upload)
+		else if($this->addPage)
 		{
-			$page = new UploadPage($this->serverRequest, $this->services, $this->login);
+			$page = new AddPage($this->serverRequest, $this->services, $this->login);
 		}
 
 		else if($this->queryPage)
