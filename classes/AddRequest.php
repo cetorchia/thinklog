@@ -23,6 +23,10 @@ class AddRequest
 	protected $fromURL;
 	protected $url;
 
+	// For add thoughts in Twitter search results
+	protected $fromTwitter;
+	protected $twitterQuery;
+
 	// For adding one thought
 	protected $add;
 	protected $body;
@@ -46,8 +50,12 @@ class AddRequest
 
 		// For retrieving from URL
 		$this->fromURL = isset($POST["fromURL"]) && ($POST["fromURL"] == "1")
-		                       && preg_match('/^http\:\/\//', $POST["url"]);
+		                 && preg_match('/^http\:\/\//', $POST["url"]);
 		$this->url = isset($POST["url"]) ? $POST["url"] : null;
+
+		// For retrieving from Twitter
+		$this->fromTwitter = isset($POST["fromTwitter"]) && ($POST["fromTwitter"] == "1");
+		$this->twitterQuery = isset($POST["twitterQuery"]) ? $POST["twitterQuery"] : null;
 
 		// For adding one thought
 		$this->add = isset($POST["add"]) && ($POST["add"] == "1");
@@ -55,7 +63,8 @@ class AddRequest
 		$this->private = isset($POST["private"]) && ($POST["private"] == '1') ? '1' : '0';
 
 		// For adding thought in any way
-		$this->isRequested = $this->add || $this->fromFile || $this->fromURL;
+		$this->isRequested = $this->add || $this->fromFile || $this->fromURL
+		                                || $this->fromTwitter;
 
 		// Access to services
 		$this->thinkerService = $services->thinkerService;
@@ -98,6 +107,12 @@ class AddRequest
 				{
 					$this->doFromURL();
 				}
+
+				// Retrieve thoughts from URL
+				else if($this->fromTwitter)
+				{
+					$this->doFromTwitter();
+				}
 			}
 
 			else
@@ -135,7 +150,16 @@ class AddRequest
 		return $this->addThoughts($data);
 	}
 
-	// Parses a thoughts file and adds the thoughts
+	// Retrieves thoughts from the URL and loads the thoughts into the DB
+
+	function doFromTwitter()
+	{
+		$url = TWITTER_SEARCH_API . "?q=" . urlencode($this->twitterQuery);
+		$data = geturl($url, "Thinklog");
+		return $this->addThoughts($data);
+	}
+
+	// Add thoughts specified in the given data string (JSON or XML/RSS)
 	function addThoughts($data) {
 		// Extract thoughts from response
 		if (substr(trim($data),0,1) == '{') {
@@ -145,7 +169,7 @@ class AddRequest
 			// Probably XML/RSS
 			$doc = new DOMDocument();
 			$doc->loadXML($data);
-			return $this->addThoughtsFromXML($doc);  // Parse the XML and add the thoughts
+			return $this->addThoughtsFromXML($doc);
 		}
 	}
 

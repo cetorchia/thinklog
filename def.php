@@ -19,6 +19,12 @@ define("MYSQL_USER", "www-data");
 define("MYSQL_PASSWORD", "ablative");
 
 //
+// External APIs
+//
+
+define("TWITTER_SEARCH_API", "http://search.twitter.com/search.json");
+
+//
 // Keyword behaviour defintions
 //
 
