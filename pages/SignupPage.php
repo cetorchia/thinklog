@@ -49,8 +49,8 @@ class SignUpPage extends Page
 					$skipSignupForm = true;
 				}
 				else {
-					$output .= "<b>Could not create thinker ".htmlentities($thinkerId).": ";
-					$output .= "Error occurred: ".htmlentities(mysql_error());
+					$output .= "<b>Could not create thinker ".htmlspecialchars($thinkerId).": ";
+					$output .= "Error occurred: ".htmlspecialchars(mysql_error());
 				}
 			}
 			$output .= "</div>\n";

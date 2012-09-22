@@ -48,7 +48,7 @@ class PageRenderService
 
 		$thoughtDate = date("r",$thought->getDate());
 
-		$a = new Anchor($this->formatService->getThoughtURL($thought), htmlentities($thoughtDate));
+		$a = new Anchor($this->formatService->getThoughtURL($thought), htmlspecialchars($thoughtDate));
 		$heading = new Heading("2",$a);
 		$output .= $heading;
 
@@ -65,7 +65,7 @@ class PageRenderService
 
 		// By whom
 		$a = new Anchor($this->formatService->getThinkerURL($thought->getThinkerId()),
-			htmlentities($thought->getThinkerId()));
+			htmlspecialchars($thought->getThinkerId()));
 		$par = new Paragraph("By " . $a);
 		$output .= $par;
 
@@ -85,7 +85,7 @@ class PageRenderService
 
 		$li->addContent($this->getThoughtLink($thought));
 		$li->addContent($br);
-		$li->addContent("&nbsp;by ".htmlentities($thought->getThinkerId()));
+		$li->addContent("&nbsp;by ".htmlspecialchars($thought->getThinkerId()));
 		$li->addContent("&nbsp;(".date("M d, Y",$thought->getDate()).")");
 
 		if($thought->getPrivate()) {

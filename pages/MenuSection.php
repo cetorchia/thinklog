@@ -54,14 +54,14 @@ class MenuSection extends Section
 		{
 			$linksDiv->addContent((new Anchor(
 					$formatService->getThinkerAllURL($thinkerId),
-					htmlentities($thinker->getName()) . "'s thoughts")
+					htmlspecialchars($thinker->getName()) . "'s thoughts")
 			)." &nbsp; ");
 
 			if((!isset($login)) || ($login->getThinkerId() != $thinkerId))
 			{
 				$linksDiv->addContent((new Anchor(
 					$formatService->getThinkerURL($thinkerId),
-					htmlentities($thinker->getName()) . "'s Thinklog")
+					htmlspecialchars($thinker->getName()) . "'s Thinklog")
 				)." &nbsp; ");
 			}
 		}

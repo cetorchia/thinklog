@@ -41,8 +41,8 @@ class QueryPage extends Page
 
 		if(isset($thinkerId))
 		{
-			$output .= "<input type=\"checkbox\" name=\"thinker\" value=\"" . htmlentities($thinkerId) . "\" />";
-			$output .= htmlentities($thinker->getName()) . "'s thots only";
+			$output .= "<input type=\"checkbox\" name=\"thinker\" value=\"" . htmlspecialchars($thinkerId) . "\" />";
+			$output .= htmlspecialchars($thinker->getName()) . "'s thots only";
 		}
 
 		$output .= "</div>\n";

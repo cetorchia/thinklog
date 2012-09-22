@@ -41,7 +41,7 @@ class ThinkerSection extends Section
 		// Info specific to the current thinker
 		if(isset($thinker))
 		{
-			$output .= new Heading(2, "About " . htmlentities($thinker->getName()));
+			$output .= new Heading(2, "About " . htmlspecialchars($thinker->getName()));
 			// $infoImg = new Image("images/thinker.png", "Thinker");
 			// $infoImg->set("height", "56");
 			// $output .= $infoImg;

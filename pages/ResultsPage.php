@@ -52,10 +52,10 @@ class ResultsPage extends Page
 
 		$div->addContent("<h2>\n");
 		$div->addContent(
-			htmlentities((!isset($query)) || (strlen($query)==0) ? "All Thoughts":"Query \"".$query."\"")." "
+			htmlspecialchars((!isset($query)) || (strlen($query)==0) ? "All Thoughts":"Query \"".$query."\"")." "
 		);
 		if(isset($thinker)) {
-			$div->addContent("By ".htmlentities($thinker->getName()));
+			$div->addContent("By ".htmlspecialchars($thinker->getName()));
 		}
 
 		$div->addContent("</h2>\n");
@@ -85,12 +85,12 @@ class ResultsPage extends Page
 		$div->addContent("<p>\n");
 
 		if($offset >= DEFAULT_QUERY_RESULTS_PER_PAGE) {
-			$div->addContent("<a href=\"".htmlentities($urlPrev)."\">&lt;&lt; Previous ".
+			$div->addContent("<a href=\"".htmlspecialchars($urlPrev)."\">&lt;&lt; Previous ".
 				 DEFAULT_QUERY_RESULTS_PER_PAGE."</a> &nbsp;\n"
 			);
 		}
 		if($moreResults) {
-			$div->addContent("<a href=\"".htmlentities($urlNext)."\">Next ".
+			$div->addContent("<a href=\"".htmlspecialchars($urlNext)."\">Next ".
 				 DEFAULT_QUERY_RESULTS_PER_PAGE." &gt;&gt;</a>\n"
 			);
 		}
