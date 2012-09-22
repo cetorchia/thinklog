@@ -1,5 +1,6 @@
 <?php
 
+require_once(DOC_ROOT . "/lib/geturl.php");
 require_once(DOC_ROOT . "/classes/Login.php");
 require_once(DOC_ROOT . "/classes/Thought.php");
 require_once(DOC_ROOT . "/classes/ThinkerService.php");
@@ -130,13 +131,7 @@ class UploadRequest
 
 	function doFromURL()
 	{
-		// Get XML from URL
-		$opts = array("http" => array(
-			"method"  => "GET",
-			"header"  => "User-Agent: Thinklog\r\n",
-		));
-		$context = stream_context_create($opts);
-		$data = file_get_contents($this->url,false,$context);
+		$data = geturl($this->url, "Thinklog");
 		return $this->addThoughts($data);
 	}
 
