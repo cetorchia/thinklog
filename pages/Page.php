@@ -67,8 +67,9 @@ abstract class Page
 
 		$body = new Body();
 
-		// Add the header and messages
+		// Add the header, menu, and messages
 		$body->addContent($headerSection->draw());
+		$body->addContent($menuSection->draw());
 		$body->addContent($messagesSection->draw());
 
 		// Add the overidden content
@@ -82,9 +83,6 @@ abstract class Page
 		{
 			$body->addContent($thinkerSection->draw());
 		}
-
-		// Finish off with menu section
-		$body->addContent($menuSection->draw());
 
 		$html->addContent($body);
 

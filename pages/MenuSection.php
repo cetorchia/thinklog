@@ -7,7 +7,7 @@ class MenuSection extends Section
 {
 	public function getContent()
 	{
-		$output = "<h2>Menu</h2>\n";
+		$output = "";
 
 		$GET = $this->serverRequest->getGET();
 
@@ -38,70 +38,70 @@ class MenuSection extends Section
 		$linksDiv = new Div();
 		$linksDiv->set("id","links");
 
-		$linksDiv->addContent(new Paragraph(new Anchor(
+		$linksDiv->addContent((new Anchor(
 				$formatService->getAllURL(),
 				"All thoughts"
-		)));
+		))." &nbsp; ");
 
 		// Link to home page
-		$linksDiv->addContent(new Paragraph(new Anchor(
+		$linksDiv->addContent((new Anchor(
 				$formatService->getQueryPageURL(),
 				"Query"
-		)));
+		))." &nbsp; ");
 
 		// Specific to current thinker
 		if(isset($thinker))
 		{
-			$linksDiv->addContent(new Paragraph(new Anchor(
+			$linksDiv->addContent((new Anchor(
 					$formatService->getThinkerAllURL($thinkerId),
 					htmlentities($thinker->getName()) . "'s thoughts")
-			));
+			)." &nbsp; ");
 
 			if((!isset($login)) || ($login->getThinkerId() != $thinkerId))
 			{
-				$linksDiv->addContent(new Paragraph(new Anchor(
+				$linksDiv->addContent((new Anchor(
 					$formatService->getThinkerURL($thinkerId),
 					htmlentities($thinker->getName()) . "'s Thinklog")
-				));
+				)." &nbsp; ");
 			}
 		}
 
 		// Specific to logged-in thinker
 		if(isset($login))
 		{
-			$linksDiv->addContent(new Paragraph(new Anchor(
+			$linksDiv->addContent((new Anchor(
 					$formatService->getThinkerURL($login->getThinkerId()),
 					"My Thinklog"
-			)));
-			$linksDiv->addContent(new Paragraph(new Anchor(
+			))." &nbsp; ");
+			$linksDiv->addContent((new Anchor(
 					$formatService->getAddURL(),
 					"Add thoughts"
-			)));
-			$linksDiv->addContent(new Paragraph(new Anchor(
+			))." &nbsp; ");
+			$linksDiv->addContent((new Anchor(
 					$formatService->getLogoutURL(),
 					"Logout"
-			)));
+			))." &nbsp; ");
 					
 		}
 
 		// If the user is not logged in... maybe they should
 		if(!isset($login))
 		{
-			$linksDiv->addContent(new Paragraph(new Anchor(
+			$linksDiv->addContent((new Anchor(
 					$formatService->getLoginURL(),
 					"Login"
-			)));
-			$linksDiv->addContent(new Paragraph(new Anchor(
+			))." &nbsp; ");
+			$linksDiv->addContent((new Anchor(
 					$formatService->getSignUpURL(),
 					"Sign up"
-			)));
+			))." &nbsp; ");
 		}
 
 		// Link to home page
-		$linksDiv->addContent(new Paragraph(new Anchor(
+		$linksDiv->addContent((new Anchor(
 				$formatService->getThinklogURL(),
 				"Home"
-		)));
+		))." &nbsp; ");
 
 		$output .= $linksDiv;
 
