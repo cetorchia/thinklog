@@ -45,7 +45,7 @@ abstract class Page
 		// Write an HTML document.
 		//
 
-		header("Content-Type: text/html");
+		header("Content-Type: text/html; charset=utf-8");
 		header("Expires: 0");
 
 		//

@@ -40,7 +40,7 @@ class PageRenderService
 	//       before calling this function on it!
 	//
 
-	function	drawThought($thought)
+	function drawThought($thought)
 	{
 		$output = "";
 
@@ -78,7 +78,7 @@ class PageRenderService
 	//       before calling this function on it!
 	//
 
-	function	drawThoughtLi($thought)
+	function drawThoughtLi($thought)
 	{
 		$li=new ListElement();
 		$br=new LineBreak();
@@ -104,7 +104,7 @@ class PageRenderService
 	{
 		$a = new Anchor(
 			$this->formatService->getThoughtURL($thought),
-            htmlentities($this->formatService->getExcerpt($thought))
+			htmlspecialchars($this->formatService->getExcerpt($thought))
 		);
 
 		return("" . $a);
