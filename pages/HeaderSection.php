@@ -10,22 +10,23 @@ class HeaderSection extends Section
 		$GET = $this->serverRequest->getGET();
 		$thinkerId = isset($GET["thinker"]) ? $GET["thinker"] : null;
 
-		$heading = "Thinklog";
+		$heading = THINKLOG_TITLE;
 		$welcome = "";
 
-		if(isset($this->login))
-		{
-			if(isset($thinkerId) && ($this->login->getThinkerId() == $thinkerId))
-			{
+		// Generate a greeting directed at the logged-in user
+		if (isset($this->login)) {
+			if (isset($thinkerId) && ($this->login->getThinkerId() == $thinkerId)) {
 				$genitive = $this->services->formatService->getGenitive($this->login->getThinkerId());
-				$heading = $genitive . " Thinklog";
+				$heading = "$genitive $heading";
 			}
+
 			$loginThinker = $this->services->thinkerService->getThinker($this->login->getThinkerId());
-			$welcome = "<p>Welcome, " . $loginThinker->getName() . "</p>";
+			$welcome = new Paragraph("Welcome, " . $loginThinker->getName() . "");
 		}
 
 		// Generate the HTML and return it.
-		$h1 = new Heading("1", $heading);
-		return $h1 . $welcome;
+		$h = new Heading("1", $heading);
+		$h->set("style", "font-style: italic;");
+		return $h . $welcome;
 	}
 }

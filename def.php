@@ -1,5 +1,8 @@
 <?php
 
+// Title for pages
+define("THINKLOG_TITLE", "Thinklog: thought analysis tool");
+
 // web host
 define("THINKLOG_URL", "http://localhost/carlos/thinklog/");
 

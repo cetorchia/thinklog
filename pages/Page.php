@@ -56,8 +56,8 @@ abstract class Page
 
 		$head = new Head();
 		$head->addContent(new Meta("http-equiv", "Expires", "0"));
-		$head->addContent(new Title("Thinklog"));
-		//$head->addContent(new Link("icon", "image/png", "images/icon.png"));
+		$head->addContent(new Title(THINKLOG_TITLE));
+		$head->addContent(new Link("icon", "image/png", "images/icon.png"));
 		$head->addContent(new Link("StyleSheet", "text/css", "style.css"));
 		$html->addContent($head);
 
