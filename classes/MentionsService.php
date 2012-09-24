@@ -87,7 +87,7 @@ class MentionsService
 		}
 
 		// Add records for the thought mentioning each of these keywords.
-		$query = "INSERT INTO mentions (thought_id, keyword_id) " .
+		$query = "INSERT IGNORE INTO mentions (thought_id, keyword_id) " .
 		         "SELECT $thoughtId, keyword_id FROM keywords " .
 		         "WHERE keyword IN (" . $this->keywordService->getKeywordsSQL($keywords) .")";
 		if (!mysql_query($query)) {

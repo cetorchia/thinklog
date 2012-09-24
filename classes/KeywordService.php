@@ -34,7 +34,7 @@ class KeywordService
 		}
 
 		// Try to put the so-far unseen keywords in the database
-		$query = "INSERT INTO keywords (keyword) " .
+		$query = "INSERT IGNORE INTO keywords (keyword) " .
 		         "VALUES " . $this->getKeywordTuplesSQL($keywords);
 		echo "  adding these keywords\n";
 		if (!mysql_query($query)) {
