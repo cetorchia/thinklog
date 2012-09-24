@@ -52,18 +52,25 @@ class MenuSection extends Section
 		// Specific to current thinker
 		if(isset($thinker))
 		{
+			$thinkerName = htmlspecialchars($thinker->getName());
+		}
+		else if(isset($thinkerId))
+		{
+			// They might have thoughts, but not an account (i.e. if their thoughts
+			// have been imported from outside
+			$thinkerName = htmlspecialchars($thinkerId);
+		}
+
+		if(isset($thinkerName)) {
 			$linksDiv->addContent((new Anchor(
 					$formatService->getThinkerAllURL($thinkerId),
-					htmlspecialchars($thinker->getName()) . "'s thoughts")
+					htmlspecialchars($thinkerName) . "'s thoughts")
 			)." &nbsp; ");
 
-			if((!isset($login)) || ($login->getThinkerId() != $thinkerId))
-			{
-				$linksDiv->addContent((new Anchor(
-					$formatService->getThinkerURL($thinkerId),
-					htmlspecialchars($thinker->getName()) . "'s Thinklog")
-				)." &nbsp; ");
-			}
+			$linksDiv->addContent((new Anchor(
+				$formatService->getThinkerURL($thinkerId),
+				htmlspecialchars($thinkerName) . "'s Thinklog")
+			)." &nbsp; ");
 		}
 
 		// Specific to logged-in thinker

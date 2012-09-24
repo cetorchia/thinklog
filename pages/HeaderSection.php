@@ -11,17 +11,13 @@ class HeaderSection extends Section
 		$thinkerId = isset($GET["thinker"]) ? $GET["thinker"] : null;
 
 		$heading = THINKLOG_TITLE;
-		$welcome = "";
 
 		// Generate a greeting directed at the logged-in user
 		if (isset($this->login)) {
-			if (isset($thinkerId) && ($this->login->getThinkerId() == $thinkerId)) {
-				$genitive = $this->services->formatService->getGenitive($this->login->getThinkerId());
-				$heading = "$genitive $heading";
-			}
-
 			$loginThinker = $this->services->thinkerService->getThinker($this->login->getThinkerId());
 			$welcome = new Paragraph("Welcome, " . $loginThinker->getName() . "");
+		} else {
+			$welcome = "";
 		}
 
 		// Generate the HTML and return it.

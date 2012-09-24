@@ -18,13 +18,12 @@ class TagCloudSection extends Section
 		$formatService = $this->services->formatService;
 		$tagCloudService = $this->services->tagCloudService;
 		$thinkerService = $this->services->thinkerService;
-		$login = $this->login;
 		$GET = $this->serverRequest->getGET();
 
-		// Get the current thinker and login thinker
-		$thinkerId = isset($GET["thinker"]) && isset($login) && ($login->getThinkerId() == $GET["thinker"]) ? $GET["thinker"] : null;
+		// Get the requested thinker or thought, if any
+		$thinkerId = isset($GET["thinker"]) ? $GET["thinker"] : null;
 		$thinker = isset($thinkerId) ? $thinkerService->getThinker($thinkerId) : null;
-		$thinkerName = isset($thinker) ? $thinker->getName() : null;
+		$thinkerName = isset($thinker) ? $thinker->getName() : $thinkerId;
 		$thoughtId = isset($GET["id"]) ? $GET["id"] : null;
 
 		// Get tag cloud
