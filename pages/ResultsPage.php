@@ -110,7 +110,12 @@ class ResultsPage extends Page
 
 		// Put a tag cloud up top
 		if(!$query) {
-			$tagCloudSection = new TagCloudSection($this->serverRequest,$this->services,$this->login);
+			$tagCloudSection = new TagCloudSection($this->serverRequest,$this->services,$this->login,
+			                                       $thinkerId);
+			$output .= "".($tagCloudSection->draw()) . "\n";
+		} else {
+			$tagCloudSection = new TagCloudSection($this->serverRequest,$this->services,$this->login,
+			                                       $thinkerId, null, $query);
 			$output .= "".($tagCloudSection->draw()) . "\n";
 		}
 

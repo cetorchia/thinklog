@@ -7,8 +7,9 @@ class TagCloudSection extends Section
 {
 	protected $thinkerId;
 	protected $thoughtId;
+	protected $query;
 
-	public function __construct($serverRequest, $services, $login, $thinkerId=null, $thoughtId=null)
+	public function __construct($serverRequest, $services, $login, $thinkerId=null, $thoughtId=null, $query=null)
 	{
 		$this->serverRequest = $serverRequest;
 		$this->services = $services;
@@ -16,6 +17,7 @@ class TagCloudSection extends Section
 
 		$this->thinkerId = $thinkerId;
 		$this->thoughtId = $thoughtId;
+		$this->query= $query;
 	}
 
 	public function getContent()
@@ -33,15 +35,40 @@ class TagCloudSection extends Section
 		$thinker = isset($thinkerId) ? $thinkerService->getThinker($thinkerId) : null;
 		$thinkerName = isset($thinker) ? $thinker->getName() : $thinkerId;
 		$thoughtId = $this->thoughtId;
+		$query = $this->query;
 
-		// Get tag cloud
-		$keywords = $tagCloudService->getKeywords($thinkerId, $thoughtId);
-		$keywordPairs = $tagCloudService->getKeywordPairs($thinkerId, $thoughtId);
+		// Retrieve keywords and keyword pairs
+		if (!$query) {
+			$keywords = $tagCloudService->getKeywords($thinkerId, $thoughtId, $query);
+			$keywordPairs = $tagCloudService->getKeywordPairs($thinkerId, $thoughtId, $query);
+		} else {
+			$keywordPairs = $tagCloudService->getKeywordPairs($thinkerId, $thoughtId, $query);
+			$keywords = array();
+			foreach ($keywordPairs as $keywordPair) {
+				$keywords[] = $keywordPair[1];
+			}
+		}
 
-		// Render HTML for tag cloud
-		$title1 = isset($thinkerId) ? "$thinkerName's " : 
-			(isset($thoughtId) ? "" : "Trending ");
-		$title2 = isset($thoughtId) ? " for this thought" : "";
+		/*
+		 * Render HTML for tag cloud
+		 */
+		if ($thinkerId) {
+			$title1 = "$thinkerName's ";
+		} else {
+			$title1 = "";
+		}
+
+		if (!$thoughtId && !$query) {
+			$title1 .= "Trending ";
+		}
+
+		if ($query) {
+			$title2 = " related to this query";
+		} else if ($thoughtId) {
+			$title2 = " of this thought";
+		} else {
+			$title2 = "";
+		}
 
 		// Render keywords
 		if ($keywords) {
@@ -64,7 +91,7 @@ class TagCloudSection extends Section
 				$keyword1 = $keywordPair[0];
 				$keyword2 = $keywordPair[1];
 				$link = new Anchor($formatService->getQueryURL("$keyword1 $keyword2"),
-				                   "$keyword1 - $keyword2");
+				                   "$keyword1&nbsp;-&nbsp;$keyword2");
 				$par->addContent("$link &nbsp; ");
 			}
 			$output .= $par;

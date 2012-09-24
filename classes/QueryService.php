@@ -101,6 +101,7 @@ class QueryService
 	public function getThoughtsByKeywords($thinkerId, $query, $start, $num)
 	{
 		$words = $this->keywordService->getWords($query);
+		$wordlist = $this->keywordService->getKeywordsSQL($words);
 
 		// Query for the thoughts related to the query's keywords
 		// Sort by the number of the query's keywords that are in the thought and then the number
@@ -110,10 +111,9 @@ class QueryService
 		         "WHERE t.thought_id = m.thought_id " .
 		         "  AND m.keyword_id = mk.keyword_id " .
 		         "  AND (r.keyword2 IS NULL OR r.keyword2 = rk.keyword_id) " .
-		         "  AND (mk.keyword IN (" . $this->keywordService->getKeywordsSQL($words) .") " .
+		         "  AND (mk.keyword IN ($wordlist) " .
 		         "       OR (m.keyword_id = r.keyword1 AND " .
-		         "           rk.keyword IN (" .
-		         $this->keywordService->getKeywordsSQL($words) ."))) " .
+		         "           rk.keyword IN ($wordlist))) " .
 		         (isset($thinkerId) ? "  AND thinker_id = '$thinkerId' " : "") .
 		         "GROUP BY t.thought_id " .
 		         "ORDER BY COUNT(DISTINCT mk.keyword_id) DESC, COUNT(DISTINCT rk.keyword_id) DESC " .

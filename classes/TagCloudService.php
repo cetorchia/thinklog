@@ -7,13 +7,16 @@
 
 class TagCloudService
 {
+	protected $keywordService;
+
 	function __construct($services)
 	{
+		$this->keywordService = $services->keywordService;
 	}
 
 	//
 	// Returns the most common keywords for the thinker and thought, or the
-	// most common keywords in general if no thinker is given.
+	// most common keywords in general if no thinker nor thought is given.
 	//
 	function getKeywords($thinkerId, $thoughtId)
 	{
@@ -57,13 +60,39 @@ class TagCloudService
 	}
 
 	//
-	// Returns the most common keyword pairs
+	// Returns the most common keyword pairs for the given query, thought, and/or thinker
 	// @return An array of two-element arrays
 	//
-	function getKeywordPairs($thinkerId, $thoughtId)
+	function getKeywordPairs($thinkerId, $thoughtId, $query)
 	{
-		// Query for keyword pairs related to this thought and thinker
-		if($thinkerId) {
+		// Query for keyword pairs related to this thought, thinker, and/or query
+		if ($query) {
+			$words = $this->keywordService->getWords($query);
+			$wordlist = $this->keywordService->getKeywordsSQL($words);
+
+			if ($thinkerId) {
+				$query = "SELECT DISTINCT k1.keyword as kw1, k2.keyword as kw2 " .
+				         "FROM keywords k1, keywords k2, keyword_pair_count, mentions, thoughts " .
+				         "WHERE k1.keyword IN ($wordlist) " .
+				         "  AND k1.keyword_id = keyword_pair_count.keyword1 " .
+				         "  AND k2.keyword_id = keyword_pair_count.keyword2 " .
+				         "  AND k1.keyword_id = mentions.keyword_id " .
+			        	 "  AND thoughts.thought_id = mentions.thought_id " .
+				         "  AND thoughts.thinker_id = '$thinkerId' " .
+				         "ORDER BY cnt DESC " .
+				         "LIMIT 5 ";
+			}
+			else {
+				$query = "SELECT DISTINCT k1.keyword as kw1, k2.keyword as kw2 " .
+				         "FROM keywords k1, keywords k2, keyword_pair_count " .
+				         "WHERE k1.keyword IN ($wordlist) " .
+				         "  AND k1.keyword_id = keyword_pair_count.keyword1 " .
+				         "  AND k2.keyword_id = keyword_pair_count.keyword2 " .
+				         "ORDER BY cnt DESC " .
+				         "LIMIT 5 ";
+			}
+		}
+		else if($thinkerId) {
 			$query = "SELECT DISTINCT k1.keyword as kw1, k2.keyword as kw2 " .
 			         "FROM keywords k1, keywords k2, keyword_pair_count, " .
 			         "     mentions m1, mentions m2, thoughts t1, thoughts t2 " .
