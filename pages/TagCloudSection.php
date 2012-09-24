@@ -42,7 +42,7 @@ class TagCloudSection extends Section
 			foreach($keywords as $keyword)
 			{
 				$link = new Anchor($formatService->getQueryURL($keyword),$keyword);
-				$par->addContent($link." ");
+				$par->addContent("$link &nbsp; ");
 			}
 			$output .= $par;
 		}
