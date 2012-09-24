@@ -33,9 +33,9 @@ class QueryService
 		$thoughtId = $thought->getId();
 		$related = array();
 
-		$result = $this->getRelatedByKeywords($thoughtId, $start, $num);
+		$result = $this->getRelatedByThought($thoughtId, $start, $num);
 		$thoughts = array();
-		$this->retrieveVisibleThoughts($login, null, $num, $result, $thoughts);
+		$this->retrieveVisibleThoughts($login, $num, $result, $thoughts);
 
 		return($thoughts);
 	}
@@ -58,15 +58,15 @@ class QueryService
 
 		if(!$query) {
 			// Get all thoughts if user specifies empty query string
-			$result = $this->getAllThoughts($start, $num);
+			$result = $this->getAllThoughts($thinkerId, $start, $num);
 		}
 
 		else {
-			$result = $this->getThoughtsByKeywords($query, $start, $num);
+			$result = $this->getThoughtsByKeywords($thinkerId, $query, $start, $num);
 		}
 
 		$thoughts = array();
-		$more = $this->retrieveVisibleThoughts($login, $thinkerId, $num, $result, $thoughts);
+		$more = $this->retrieveVisibleThoughts($login, $num, $result, $thoughts);
 
 		return($more);
 	}
@@ -75,11 +75,12 @@ class QueryService
 	// Gets all thoughts
 	// @return A mysql_query() result object
 	//
-	public function getAllThoughts($start,$num)
+	public function getAllThoughts($thinkerId, $start,$num)
 	{
 		// Query for all thoughts, starting at most recent
 		$query = "SELECT $this->thoughtColumns " .
 		         "FROM thoughts " .
+		         (isset($thinkerId) ? "WHERE thinker_id = '$thinkerId' " : "") .
 		         "ORDER BY date DESC LIMIT ".($num+1)." OFFSET $start ";
 		return mysql_query($query);
 	}
@@ -88,7 +89,7 @@ class QueryService
 	// Gets thoughts related to the query string
 	// @return A mysql_query() result object
 	//
-	public function getThoughtsByKeywords($query, $start, $num)
+	public function getThoughtsByKeywords($thinkerId, $query, $start, $num)
 	{
 		$words = $this->keywordService->getWords($query);
 
@@ -104,6 +105,7 @@ class QueryService
 		         "       OR (m.keyword_id = r.keyword1 AND " .
 		         "           rk.keyword IN (" .
 		         $this->keywordService->getKeywordsSQL($words) ."))) " .
+		         (isset($thinkerId) ? "  AND thinker_id = '$thinkerId' " : "") .
 		         "GROUP BY t.thought_id " .
 		         "ORDER BY COUNT(DISTINCT mk.keyword_id) DESC, COUNT(DISTINCT rk.keyword_id) DESC " .
 		         "LIMIT ".($num+1)." OFFSET $start ";
@@ -114,7 +116,7 @@ class QueryService
 	// Gets thoughts related to the thought with this Id
 	// @return A mysql_query() result object
 	//
-	public function getRelatedByKeywords($thoughtId, $start, $num)
+	public function getRelatedByThought($thoughtId, $start, $num)
 	{
 		// Query for the thoughts related to this thought's keywords
 		// Sort by the number of the keywords of this thought that are in the related thought
@@ -139,7 +141,7 @@ class QueryService
 	// Stores them in $thoughts, returns whether there are more after these
 	//
 
-	public function retrieveVisibleThoughts($login, $thinkerId, $num, $result, &$thoughts)
+	public function retrieveVisibleThoughts($login, $num, $result, &$thoughts)
 	{
 		$n = 0;
 		while ($row = mysql_fetch_array($result)) { 
@@ -148,17 +150,14 @@ class QueryService
 			// Add the thought to the collection if permissible
 			if(isset($thought) && $this->thoughtService->getReadPermission($login, $thought))
 			{
-				if((!isset($thinkerId)) || ($thought->getThinkerId() == $thinkerId))
-				{
-					// Don't go over limit
-					$n = $n + 1;
-					if($n > $num) {
-						return(true);
-					}
-
-					// Add the thought to our results
-					$thoughts[] = $thought;
+				// Don't go over limit
+				$n = $n + 1;
+				if($n > $num) {
+					return(true);
 				}
+
+				// Add the thought to our results
+				$thoughts[] = $thought;
 			}
 
 		}
