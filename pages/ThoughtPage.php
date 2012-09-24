@@ -35,14 +35,14 @@ class ThoughtPage extends Page
 		 */
 
 		$thinkerId = isset($GET["thinker"]) ? $GET["thinker"] : null;
+		$thoughtId = isset($GET["id"]) ? $GET["id"] : null;
 
 		/*
 		 * Get thought id from server request and get the thought data.
 		 */
 
-		if(isset($GET["id"]))
+		if(isset($thoughtId))
 		{
-			$thoughtId = $GET["id"];
 			$thought = $thoughtService->getThought($thoughtId);
 			$thinkerId = $thought->getThinkerId();
 		}
@@ -64,7 +64,8 @@ class ThoughtPage extends Page
 		}
 
 		// Add a tag cloud
-		$tagCloudSection = new TagCloudSection($this->serverRequest,$this->services,$this->login);
+		$tagCloudSection = new TagCloudSection($this->serverRequest,$this->services,$this->login,
+		                                       null, $thoughtId);
 		$output .= "".($tagCloudSection->draw()) . "\n";
 
 		//
@@ -93,9 +94,7 @@ class ThoughtPage extends Page
 				$relatedDiv->addContent("<h2>Related thoughts</h2>");
 
 				$relatedDiv->addContent("<p>");
-				$thoughts = array();
-				// TODO
-				$thoughts = $queryService->getRelated($login, 0, DEFAULT_QUERY_RESULTS_PER_PAGE, $thought);
+				$thoughts = $queryService->getRelated($login, 0, DEFAULT_QUERY_RESULTS_PER_PAGE, $thoughtId);
 				$relatedDiv->addContent($pageRenderService->drawThoughts($thoughts));
 				$relatedDiv->addContent("</p>");
 

@@ -5,10 +5,18 @@ require_once(DOC_ROOT . "/pages/Section.php");
 
 class TagCloudSection extends Section
 {
+	protected $thinkerId;
+	protected $thoughtId;
 
-	// Note: if you have a thinker section, there should be some 
-	// indication as to what the thinker is, i.e. this page is for an 
-	// article, or a query specific to a certain thinker.
+	public function __construct($serverRequest, $services, $login, $thinkerId=null, $thoughtId=null)
+	{
+		$this->serverRequest = $serverRequest;
+		$this->services = $services;
+		$this->login = $login;
+
+		$this->thinkerId = $thinkerId;
+		$this->thoughtId = $thoughtId;
+	}
 
 	public function getContent()
 	{
@@ -21,10 +29,10 @@ class TagCloudSection extends Section
 		$GET = $this->serverRequest->getGET();
 
 		// Get the requested thinker or thought, if any
-		$thinkerId = isset($GET["thinker"]) ? $GET["thinker"] : null;
+		$thinkerId = $this->thinkerId;
 		$thinker = isset($thinkerId) ? $thinkerService->getThinker($thinkerId) : null;
 		$thinkerName = isset($thinker) ? $thinker->getName() : $thinkerId;
-		$thoughtId = isset($GET["id"]) ? $GET["id"] : null;
+		$thoughtId = $this->thoughtId;
 
 		// Get tag cloud
 		$keywords = $tagCloudService->getKeywords($thinkerId, $thoughtId);

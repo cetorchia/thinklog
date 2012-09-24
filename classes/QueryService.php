@@ -13,6 +13,7 @@ class QueryService
 	protected $keywordService;
 
 	protected $thoughtColumns = "thought_id, UNIX_TIMESTAMP(date) AS date, thinker_id, content AS body, private";
+	protected $thoughtColumns2 = "t2.thought_id, UNIX_TIMESTAMP(t2.date) AS date, t2.thinker_id, t2.content AS body, t2.private";
 
 	//
 	// We'll need a few services to get data from the database
@@ -25,19 +26,29 @@ class QueryService
 	}
 
 	//
+	// Gets thoughts recommended for a thinker
+	//
+
+	public function getRecommended($login, $start, $num, $thinkerId)
+	{
+		$result = $this->getRecommendedByThinker($thinkerId, $start, $num);
+		$thoughts = array();
+		$this->retrieveVisibleThoughts($login, $num, $result, $thoughts);
+
+		return $thoughts;
+	}
+
+	//
 	// Gets articles related to the thought
 	//
 
-	public function getRelated($login, $start, $num, $thought)
+	public function getRelated($login, $start, $num, $thoughtId)
 	{
-		$thoughtId = $thought->getId();
-		$related = array();
-
 		$result = $this->getRelatedByThought($thoughtId, $start, $num);
 		$thoughts = array();
 		$this->retrieveVisibleThoughts($login, $num, $result, $thoughts);
 
-		return($thoughts);
+		return $thoughts;
 	}
 
 	//
@@ -54,8 +65,6 @@ class QueryService
 			$num,
 			&$thoughts)
 	{
-		$related = array();
-
 		if(!$query) {
 			// Get all thoughts if user specifies empty query string
 			$result = $this->getAllThoughts($thinkerId, $start, $num);
@@ -68,7 +77,7 @@ class QueryService
 		$thoughts = array();
 		$more = $this->retrieveVisibleThoughts($login, $num, $result, $thoughts);
 
-		return($more);
+		return $more;
 	}
 
 	//
@@ -131,7 +140,25 @@ class QueryService
 		         "           AND r.keyword2 = m.keyword_id)) " .
 		         "  AND m.thought_id <> t.thought_id " .
 		         "GROUP BY t.thought_id " .
-		         "ORDER BY COUNT(DISTINCT m.keyword_id), COUNT(DISTINCT r.keyword2) DESC " .
+		         "ORDER BY COUNT(DISTINCT m.keyword_id) DESC, COUNT(DISTINCT r.keyword2) DESC " .
+		         "LIMIT ".($num+1)." OFFSET $start ";
+		return mysql_query($query);
+	}
+
+	//
+	// Gets thoughts recommended for this thinker
+	// @return A mysql_query() result object
+	//
+	public function getRecommendedByThinker($thinkerId, $start, $num)
+	{
+		// TODO: none of these queries will work if there are any related keyword pairs
+		$query = "SELECT $this->thoughtColumns2 " .
+		         "FROM thoughts t1, mentions m1, thoughts t2, mentions m2 " .
+		         "WHERE t1.thinker_id = '$thinkerId' AND t1.thought_id = m1.thought_id " .
+		         "  AND t1.thinker_id <> t2.thinker_id AND t2.thought_id = m2.thought_id " .
+		         "  AND m1.keyword_id = m2.keyword_id " .
+		         "GROUP BY t2.thought_id " .
+		         "ORDER BY COUNT(DISTINCT m1.keyword_id) DESC " .
 		         "LIMIT ".($num+1)." OFFSET $start ";
 		return mysql_query($query);
 	}
@@ -153,7 +180,7 @@ class QueryService
 				// Don't go over limit
 				$n = $n + 1;
 				if($n > $num) {
-					return(true);
+					return true;
 				}
 
 				// Add the thought to our results
@@ -162,6 +189,6 @@ class QueryService
 
 		}
 
-		return(false);
+		return false;
 	}
 }

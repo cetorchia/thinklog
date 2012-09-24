@@ -1,5 +1,6 @@
 <?php
 
+require_once(DOC_ROOT . "/pages/RecommendedPage.php");
 require_once(DOC_ROOT . "/pages/ThoughtPage.php");
 require_once(DOC_ROOT . "/pages/ResultsPage.php");
 require_once(DOC_ROOT . "/pages/QueryPage.php");
@@ -48,12 +49,6 @@ class PageRequest
 
 	public function execute()
 	{
-		// Do we display My Thinklog?
-		$myThinklog=
-			isset($this->login) &&
-			isset($this->thinkerId) &&
-			($this->thinkerId == $this->login->getThinkerId());
-
 		//
 		// Determine what kind of page this is requested.
 		//
@@ -88,25 +83,19 @@ class PageRequest
 			$page = new QueryPage($this->serverRequest, $this->services, $this->login);
 		}
 
-		else if($myThinklog)
-		{
-			$page = new ThoughtPage($this->serverRequest, $this->services, $this->login);
-			// $page = new MyThinklogPage($this->serverRequest, $this->services, $this->login);
-		}
-
 		else if($this->thinkerId)
 		{
-			$page = new ThoughtPage($this->serverRequest, $this->services, $this->login);
+			$page = new RecommendedPage($this->serverRequest, $this->services, $this->login);
 		}
 
-		// If no particular page is specified, but the user is logged in, then give the user's thinklog.
+		// If no particular page is specified, but the user is logged in,
+		// then give the user's personalized page.
 		else if(isset($this->login))
 		{
-			$page = new ThoughtPage($this->serverRequest, $this->services, $this->login);
-			// $page = new MyThinklogPage($this->serverRequest, $this->services, $this->login);
+			$page = new RecommendedPage($this->serverRequest, $this->services, $this->login);
 		}
 
-		// If the user is not logged in, and there is no request, then give all the thots.
+		// If the user is not logged in and page is specified, then show all thoughts.
 		else
 		{
 			$page = new ResultsPage($this->serverRequest, $this->services, $this->login);
