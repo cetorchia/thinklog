@@ -1,10 +1,10 @@
 <?php
 
 //
-// Functions that (hopefully) turn your typical microblog into a thinklog.
+// Methods for finding relevant thoughts in the database
 //
-// (c) 2010 Carlos E. Torchia 
-// Licensed under GNU GPL v2, see fsf.org
+// (c) 2010 Carlos E. Torchia
+// Licensed under GNU GPL v2, see fsf.org, no warranty
 //
 
 class QueryService
@@ -12,7 +12,8 @@ class QueryService
 	protected $thoughtService;
 	protected $keywordService;
 
-	protected $thoughtColumns = "thought_id, UNIX_TIMESTAMP(date) AS date, thinker_id, content AS body, private";
+	protected $thoughtColumns0 = "thought_id, date, thinker_id, body, private";
+	protected $thoughtColumns1 = "thought_id, UNIX_TIMESTAMP(date) AS date, thinker_id, content AS body, private";
 	protected $thoughtColumns2 = "t2.thought_id, UNIX_TIMESTAMP(t2.date) AS date, t2.thinker_id, t2.content AS body, t2.private";
 
 	//
@@ -87,7 +88,7 @@ class QueryService
 	public function getAllThoughts($thinkerId, $start, $num)
 	{
 		// Query for all thoughts, starting at most recent
-		$query = "SELECT $this->thoughtColumns " .
+		$query = "SELECT $this->thoughtColumns1 " .
 		         "FROM thoughts " .
 		         (isset($thinkerId) ? "WHERE thinker_id = '$thinkerId' " : "") .
 		         "ORDER BY date DESC LIMIT ".($num+1)." OFFSET $start ";
@@ -102,22 +103,29 @@ class QueryService
 	{
 		$words = $this->keywordService->getWords($query);
 		$wordlist = $this->keywordService->getKeywordsSQL($words);
+		$thinkerClause = (isset($thinkerId) ? "  AND thinker_id = '$thinkerId' " : "") .
 
 		// Query for the thoughts related to the query's keywords
-		// Sort by the number of the query's keywords that are in the thought and then the number
+		// Sort by the number of the query's keywords that are in the thought and then by the number
 		// of the query's keywords that are related to a keyword in the thought.
-		$query = "SELECT t.$this->thoughtColumns " .
-		         "FROM (thoughts t, mentions m, keywords mk) LEFT JOIN (related_keywords r, keywords rk) ON (1 = 1) " .
-		         "WHERE t.thought_id = m.thought_id " .
-		         "  AND m.keyword_id = mk.keyword_id " .
-		         "  AND (r.keyword2 IS NULL OR r.keyword2 = rk.keyword_id) " .
-		         "  AND (mk.keyword IN ($wordlist) " .
-		         "       OR (m.keyword_id = r.keyword1 AND " .
-		         "           rk.keyword IN ($wordlist))) " .
-		         (isset($thinkerId) ? "  AND thinker_id = '$thinkerId' " : "") .
-		         "GROUP BY t.thought_id " .
-		         "ORDER BY COUNT(DISTINCT mk.keyword_id) DESC, COUNT(DISTINCT rk.keyword_id) DESC " .
+		$query = "SELECT $this->thoughtColumns0 " .
+		         "FROM ( ".
+		         "  (SELECT t.$this->thoughtColumns1, m.keyword_id AS mk, NULL AS rk " .
+		         "   FROM thoughts t, mentions m, keywords k " .
+		         "   WHERE t.thought_id = m.thought_id AND m.keyword_id = k.keyword_id " .
+		         "     AND k.keyword IN ($wordlist) " .
+		         "     $thinkerClause) " .
+		         "  UNION " .
+		         "  (SELECT t.$this->thoughtColumns1, NULL AS mk, r.keyword2 AS rk " .
+		         "   FROM thoughts t, mentions m, related_keywords r, keywords k1, keywords k2 " .
+		         "   WHERE t.thought_id = m.thought_id AND m.keyword_id = k1.keyword_id " .
+		         "     AND k1.keyword_id = r.keyword1 AND k2.keyword_id = r.keyword2 " .
+		         "     AND k2.keyword IN ($wordlist) " .
+		         "     $thinkerClause)) tbl " .
+		         "GROUP BY thought_id " .
+		         "ORDER BY COUNT(DISTINCT mk) DESC, COUNT(DISTINCT rk) DESC " .
 		         "LIMIT ".($num+1)." OFFSET $start ";
+
 		return mysql_query($query);
 	}
 
@@ -131,16 +139,24 @@ class QueryService
 		// Sort by the number of the keywords of this thought that are in the related thought
                 // and then by the number keywords of this thought that are related to a keyword in the
 		// related thought.
-		$query = "SELECT t.$this->thoughtColumns " .
-		         "FROM (thoughts t, mentions tm, mentions m) LEFT JOIN (related_keywords r) ON (1 = 1) " .
-		         "WHERE m.thought_id = $thoughtId " .
-		         "  AND t.thought_id = tm.thought_id " .
-		         "  AND (tm.keyword_id = m.keyword_id " .
-		         "       OR (tm.keyword_id = r.keyword1 " .
-		         "           AND r.keyword2 = m.keyword_id)) " .
-		         "  AND m.thought_id <> t.thought_id " .
-		         "GROUP BY t.thought_id " .
-		         "ORDER BY COUNT(DISTINCT m.keyword_id) DESC, COUNT(DISTINCT r.keyword2) DESC " .
+		$query = "SELECT $this->thoughtColumns0 " .
+		         "FROM ( ".
+		         "  (SELECT t.$this->thoughtColumns1, m1.keyword_id AS mk, NULL AS rk " .
+		         "   FROM thoughts t, mentions m1, mentions m2 " .
+		         "   WHERE m1.thought_id = $thoughtId " .
+		         "     AND m1.keyword_id = m2.keyword_id " .
+		         "     AND t.thought_id = m2.thought_id " .
+		         "     AND t.thought_id <> m1.thought_id) " .
+		         "  UNION " .
+		         "  (SELECT t.$this->thoughtColumns1, NULL AS mk, r.keyword1 AS rk " .
+		         "   FROM thoughts t, mentions m1, mentions m2, related_keywords r " .
+		         "   WHERE m1.thought_id = $thoughtId " .
+		         "     AND m1.keyword_id = r.keyword1 " .
+		         "     AND m2.keyword_id = r.keyword2 " .
+		         "     AND m2.thought_id = t.thought_id " .
+		         "     AND m1.thought_id <> t.thought_id)) tbl " .
+		         "GROUP BY thought_id " .
+		         "ORDER BY COUNT(DISTINCT mk) DESC, COUNT(DISTINCT rk) DESC " .
 		         "LIMIT ".($num+1)." OFFSET $start ";
 		return mysql_query($query);
 	}
@@ -151,14 +167,24 @@ class QueryService
 	//
 	public function getRecommendedByThinker($thinkerId, $start, $num)
 	{
-		// TODO: none of these queries will work if there are any related keyword pairs
-		$query = "SELECT $this->thoughtColumns2 " .
-		         "FROM thoughts t1, mentions m1, thoughts t2, mentions m2 " .
-		         "WHERE t1.thinker_id = '$thinkerId' AND t1.thought_id = m1.thought_id " .
-		         "  AND t1.thinker_id <> t2.thinker_id AND t2.thought_id = m2.thought_id " .
-		         "  AND m1.keyword_id = m2.keyword_id " .
-		         "GROUP BY t2.thought_id " .
-		         "ORDER BY COUNT(DISTINCT m1.keyword_id) DESC " .
+		// Get thoughts that are by other thinkers that have the same keywords as or
+		// related keywords to thoughts of this thinker.
+		$query = "SELECT $this->thoughtColumns0 " .
+		         "FROM ( " .
+		         "  (SELECT $this->thoughtColumns2, m1.keyword_id AS mk, NULL AS rk " .
+		         "   FROM thoughts t1, mentions m1, thoughts t2, mentions m2 " .
+		         "   WHERE t1.thinker_id = '$thinkerId' AND t1.thought_id = m1.thought_id " .
+		         "     AND t1.thinker_id <> t2.thinker_id AND t2.thought_id = m2.thought_id " .
+		         "     AND m1.keyword_id = m2.keyword_id) " .
+		         "  UNION " .
+		         "  (SELECT $this->thoughtColumns2, NULL AS mk, r.keyword1 AS rk " .
+		         "   FROM thoughts t1, mentions m1, thoughts t2, mentions m2, related_keywords r " .
+		         "   WHERE t1.thinker_id = '$thinkerId' AND t1.thought_id = m1.thought_id " .
+		         "     AND t1.thinker_id <> t2.thinker_id AND t2.thought_id = m2.thought_id " .
+		         "     AND m1.keyword_id = r.keyword1 " .
+		         "     AND m2.keyword_id = r.keyword2)) tbl " .
+		         "GROUP BY thought_id " .
+		         "ORDER BY COUNT(DISTINCT mk) DESC, COUNT(DISTINCT rk) DESC " .
 		         "LIMIT ".($num+1)." OFFSET $start ";
 		return mysql_query($query);
 	}
@@ -174,15 +200,15 @@ class QueryService
 		while ($row = mysql_fetch_array($result)) { 
 			$thought = $this->thoughtService->getFromRow($row);
 
+			// Don't go over limit
+			$n = $n + 1;
+			if($n > $num) {
+				return true;
+			}
+
 			// Add the thought to the collection if permissible
 			if(isset($thought) && $this->thoughtService->getReadPermission($login, $thought))
 			{
-				// Don't go over limit
-				$n = $n + 1;
-				if($n > $num) {
-					return true;
-				}
-
 				// Add the thought to our results
 				$thoughts[] = $thought;
 			}
