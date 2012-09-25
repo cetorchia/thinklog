@@ -36,8 +36,8 @@ class MentionsService
 			// Retrieve thoughts
 			//
 			$this->timerService->start('query');
-			$result = $this->queryService->getAllThoughts($offset, $num);
-			echo "Retrieved thoughts in " . $this->timerService->read('query') . " seconds\n";
+			$result = $this->queryService->getAllThoughts(null, $offset, $num);
+			echo "Retrieved $num thoughts in " . $this->timerService->read('query') . " seconds\n";
 
 			//
 			// Try to get previously unseen "mentions" for these thoughts
@@ -51,7 +51,6 @@ class MentionsService
 				// Retrieve thought data
 				$thought = $this->thoughtService->getFromRow($row);
 				echo "Thought: " . $thought->getId() . " (" . date("r",$thought->getDate()) . ")\n";
-				echo "  \"".$thought->getBody()."\"\n";
 
 				// Search for mentions
 				$this->timerService->start('query');

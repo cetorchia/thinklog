@@ -84,7 +84,7 @@ class QueryService
 	// Gets all thoughts
 	// @return A mysql_query() result object
 	//
-	public function getAllThoughts($thinkerId, $start,$num)
+	public function getAllThoughts($thinkerId, $start, $num)
 	{
 		// Query for all thoughts, starting at most recent
 		$query = "SELECT $this->thoughtColumns " .

@@ -37,6 +37,12 @@ as select keyword_id, count(thought_id) as cnt
    group by keyword_id
 ;
 
+create or replace view common_keywords
+as select keyword_id
+   from keyword_count
+   where cnt > 5
+;
+
 create or replace view keyword_pair_count
 as select m1.keyword_id as keyword1, m2.keyword_id as keyword2,
           count(m1.thought_id) as cnt
@@ -45,12 +51,8 @@ as select m1.keyword_id as keyword1, m2.keyword_id as keyword2,
      and m1.keyword_id <> m2.keyword_id
    group by m1.keyword_id, m2.keyword_id;
 
-create table if not exists common_keywords (
-	keyword_id integer primary key
-);
-
-create table if not exists related_keywords (
-	keyword1 integer,
-	keyword2 integer,
-	UNIQUE (keyword1, keyword2)
-);
+create or replace view related_keywords
+as select keyword1, keyword2
+   from keyword_pair_count
+   where cnt > 5
+;

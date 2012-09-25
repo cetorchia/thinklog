@@ -3,6 +3,7 @@
 //
 // Background process that updates knowledge about thoughts
 // periodically, particularly about thought keywords.
+// TODO: Deduce more about thoughts than that!
 //
 
 require_once("def.php");
@@ -28,24 +29,11 @@ $dbConnectionService = new DBConnectionService($services);
 $dbConnectionService->connect();
 
 //
-// Update knowledgebase for for any keywords that have become common.
-//
-
-$commonKeywordService->update();
-
-//
-// Update knowledgebase for any keywords thoughts mention
+// Update knowledgebase for any keywords thoughts mention.
+// This can change as keywords become common keywords.
 //
 
 $mentionsService->update();
-
-//
-// Update the knowledgebase for any relationships between keywords arising
-// from thoughts. We do this after the mentions because the relationships
-// between keywords depends on them.
-//
-
-$relatedKeywordService->update();
 
 // Print running time
 echo "Total " . $timerService->read('total') . " seconds\n";
