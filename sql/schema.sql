@@ -38,7 +38,7 @@ as select keyword_id, count(thought_id) as cnt
 ;
 
 create or replace view common_keywords
-as select keyword_id
+as select keyword_id, cnt
    from keyword_count
    where cnt > 5
 ;
@@ -49,10 +49,18 @@ as select m1.keyword_id as keyword1, m2.keyword_id as keyword2,
    from mentions m1, mentions m2
    where m1.thought_id = m2.thought_id
      and m1.keyword_id <> m2.keyword_id
-   group by m1.keyword_id, m2.keyword_id;
+   group by m1.keyword_id, m2.keyword_id
+;
 
 create or replace view related_keywords
-as select keyword1, keyword2
+as select keyword1, keyword2, cnt
    from keyword_pair_count
    where cnt > 5
+;
+
+create or replace view keyword_idf
+as select keyword_id, log((select count(thought_id) from thoughts)/count(t.thought_id)) idf
+   from thoughts t, mentions m
+   where t.thought_id = m.thought_id
+   group by keyword_id
 ;

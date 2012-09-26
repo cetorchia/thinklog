@@ -110,20 +110,23 @@ class QueryService
 		// of the query's keywords that are related to a keyword in the thought.
 		$query = "SELECT $this->thoughtColumns0 " .
 		         "FROM ( ".
-		         "  (SELECT t.$this->thoughtColumns1, m.keyword_id AS mk, NULL AS rk " .
-		         "   FROM thoughts t, mentions m, keywords k " .
-		         "   WHERE t.thought_id = m.thought_id AND m.keyword_id = k.keyword_id " .
+		         "  (SELECT t.$this->thoughtColumns1, m.keyword_id AS mk, NULL AS rk, idf " .
+		         "   FROM thoughts t, mentions m, keywords k, keyword_idf i " .
+		         "   WHERE t.thought_id = m.thought_id " .
+		         "     AND i.keyword_id = m.keyword_id " .
+		         "     AND m.keyword_id = k.keyword_id " .
 		         "     AND k.keyword IN ($wordlist) " .
 		         "     $thinkerClause) " .
 		         "  UNION " .
-		         "  (SELECT t.$this->thoughtColumns1, NULL AS mk, r.keyword2 AS rk " .
-		         "   FROM thoughts t, mentions m, related_keywords r, keywords k1, keywords k2 " .
-		         "   WHERE t.thought_id = m.thought_id AND m.keyword_id = k1.keyword_id " .
-		         "     AND k1.keyword_id = r.keyword1 AND k2.keyword_id = r.keyword2 " .
-		         "     AND k2.keyword IN ($wordlist) " .
+		         "  (SELECT t.$this->thoughtColumns1, NULL AS mk, r.keyword2 AS rk, idf " .
+		         "   FROM thoughts t, mentions m, related_keywords r, keywords k, keyword_idf i " .
+		         "   WHERE t.thought_id = m.thought_id AND m.keyword_id = r.keyword1 " .
+		         "     AND i.keyword_id = r.keyword1 " .
+		         "     AND k.keyword_id = r.keyword2 " .
+		         "     AND k.keyword IN ($wordlist) " .
 		         "     $thinkerClause)) tbl " .
 		         "GROUP BY thought_id " .
-		         "ORDER BY COUNT(DISTINCT mk) DESC, COUNT(DISTINCT rk) DESC " .
+		         "ORDER BY (COUNT(DISTINCT mk) + COUNT(DISTINCT rk))*AVG(idf) DESC " .
 		         "LIMIT ".($num+1)." OFFSET $start ";
 
 		return mysql_query($query);
@@ -141,22 +144,24 @@ class QueryService
 		// related thought.
 		$query = "SELECT $this->thoughtColumns0 " .
 		         "FROM ( ".
-		         "  (SELECT t.$this->thoughtColumns1, m1.keyword_id AS mk, NULL AS rk " .
-		         "   FROM thoughts t, mentions m1, mentions m2 " .
+		         "  (SELECT t.$this->thoughtColumns1, m1.keyword_id AS mk, NULL AS rk, idf " .
+		         "   FROM thoughts t, mentions m1, mentions m2, keyword_idf i " .
 		         "   WHERE m1.thought_id = $thoughtId " .
 		         "     AND m1.keyword_id = m2.keyword_id " .
 		         "     AND t.thought_id = m2.thought_id " .
-		         "     AND t.thought_id <> m1.thought_id) " .
+		         "     AND t.thought_id <> m1.thought_id " .
+		         "     AND i.keyword_id = m2.keyword_id) " .
 		         "  UNION " .
-		         "  (SELECT t.$this->thoughtColumns1, NULL AS mk, r.keyword1 AS rk " .
-		         "   FROM thoughts t, mentions m1, mentions m2, related_keywords r " .
+		         "  (SELECT t.$this->thoughtColumns1, NULL AS mk, r.keyword1 AS rk, idf " .
+		         "   FROM thoughts t, mentions m1, mentions m2, related_keywords r, keyword_idf i " .
 		         "   WHERE m1.thought_id = $thoughtId " .
 		         "     AND m1.keyword_id = r.keyword1 " .
 		         "     AND m2.keyword_id = r.keyword2 " .
 		         "     AND m2.thought_id = t.thought_id " .
-		         "     AND m1.thought_id <> t.thought_id)) tbl " .
+		         "     AND m1.thought_id <> t.thought_id " .
+		         "     AND i.keyword_id = m2.keyword_id)) tbl " .
 		         "GROUP BY thought_id " .
-		         "ORDER BY COUNT(DISTINCT mk) DESC, COUNT(DISTINCT rk) DESC " .
+		         "ORDER BY (COUNT(DISTINCT mk) + COUNT(DISTINCT rk))*AVG(idf) DESC " .
 		         "LIMIT ".($num+1)." OFFSET $start ";
 		return mysql_query($query);
 	}
@@ -171,20 +176,21 @@ class QueryService
 		// related keywords to thoughts of this thinker.
 		$query = "SELECT $this->thoughtColumns0 " .
 		         "FROM ( " .
-		         "  (SELECT $this->thoughtColumns2, m1.keyword_id AS mk, NULL AS rk " .
-		         "   FROM thoughts t1, mentions m1, thoughts t2, mentions m2 " .
+		         "  (SELECT $this->thoughtColumns2, m1.keyword_id AS mk, NULL AS rk, idf " .
+		         "   FROM thoughts t1, mentions m1, thoughts t2, mentions m2, keyword_idf i " .
 		         "   WHERE t1.thinker_id = '$thinkerId' AND t1.thought_id = m1.thought_id " .
 		         "     AND t1.thinker_id <> t2.thinker_id AND t2.thought_id = m2.thought_id " .
-		         "     AND m1.keyword_id = m2.keyword_id) " .
+		         "     AND m1.keyword_id = m2.keyword_id " .
+		         "     AND i.keyword_id = m2.keyword_id) " .
 		         "  UNION " .
-		         "  (SELECT $this->thoughtColumns2, NULL AS mk, r.keyword1 AS rk " .
-		         "   FROM thoughts t1, mentions m1, thoughts t2, mentions m2, related_keywords r " .
+		         "  (SELECT $this->thoughtColumns2, NULL AS mk, r.keyword1 AS rk, idf " .
+		         "   FROM thoughts t1, mentions m1, thoughts t2, mentions m2, related_keywords r, keyword_idf i " .
 		         "   WHERE t1.thinker_id = '$thinkerId' AND t1.thought_id = m1.thought_id " .
 		         "     AND t1.thinker_id <> t2.thinker_id AND t2.thought_id = m2.thought_id " .
-		         "     AND m1.keyword_id = r.keyword1 " .
-		         "     AND m2.keyword_id = r.keyword2)) tbl " .
+		         "     AND m1.keyword_id = r.keyword1 AND m2.keyword_id = r.keyword2 " .
+		         "     AND i.keyword_id = m2.keyword_id)) tbl " .
 		         "GROUP BY thought_id " .
-		         "ORDER BY COUNT(DISTINCT mk) DESC, COUNT(DISTINCT rk) DESC " .
+		         "ORDER BY (COUNT(DISTINCT mk) + COUNT(DISTINCT rk))*AVG(idf) DESC " .
 		         "LIMIT ".($num+1)." OFFSET $start ";
 		return mysql_query($query);
 	}
