@@ -11,7 +11,7 @@
 /* body */
 
 body,td {
-	background:  #668;
+	background:  #557;
 	color:       #000;
 	font-size:   85%;
 	font-family: sans-serif;
@@ -25,6 +25,8 @@ body,td {
 .section {
 	padding:    1em;
 	margin:     0.5em;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
 }
 
 
@@ -64,6 +66,7 @@ h1,h2,h3 {
 }
 
 h1 {
+	font-style: italic;
 	font-size:   200%;
 	font-weight: normal;
 }
@@ -96,12 +99,15 @@ hr {
  */
 
 a:link, a:visited {
-	color:           #722;
-	text-decoration: underline;
+	font-size:       1.1em;
+	color:           #336;
+	text-decoration: none;
 }
 
-a:hover {
-	color: #1b1;
+a:hover, a:active {
+	font-size:       1.1em;
+	color:           #00a;
+	text-decoration: underline;
 }
 
 a img {
@@ -113,4 +119,40 @@ a img {
 
 li {
 	padding-bottom: 3px;
+}
+
+/* Bubbles */
+
+div.bubble {
+	padding: 10px;
+	margin: 5px;
+	color: #000;
+	background: #f4f4d8;
+	border: 1px solid #bbb;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+}
+
+/* Tag clouds */
+
+div.tag_cloud {
+	margin: 5px;
+	width:45%;
+}
+
+/* Thought page */
+
+div.thought_body {
+	font-size: 1.3em;
+	padding: 15px;
+}
+
+/* Query results */
+
+div.result {
+	width:75%;
+}
+
+div.result a:link, div.result a:visited, div.result a:hover, div.result a:active {
+	font-size: 1.2em;
 }

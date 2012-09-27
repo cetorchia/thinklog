@@ -23,13 +23,13 @@ class PageRenderService
 			return $par;
 		}
 
-		$ul = new UnorderedList();
+		$output = "";
 
 		foreach($thoughts as $thought) {
-			$ul->addContent($this->drawThoughtLi($thought));
+			$output .= $this->drawThoughtListing($thought);
 		}
 
-		return "" . $ul;
+		return $output;
 	}
 
 	//
@@ -44,14 +44,6 @@ class PageRenderService
 	{
 		$output = "";
 
-		// Print the heading
-
-		$thoughtDate = date("r",$thought->getDate());
-
-		$a = new Anchor($this->formatService->getThoughtURL($thought), htmlspecialchars($thoughtDate));
-		$heading = new Heading("2",$a);
-		$output .= $heading;
-
 		// Private?
 		if($thought->getPrivate())
 		{
@@ -60,39 +52,43 @@ class PageRenderService
 		}
 
 		// thought text
-		$par = new Paragraph($this->formatService->formatText($thought->getBody()));
-		$output .= $par;
+		$div = new Div($this->formatService->formatText($thought->getBody()));
+		$div->set("class", "bubble thought_body");
+		$output .= $div;
 
-		// By whom
+		// By whom and when
 		$a = new Anchor($this->formatService->getThinkerURL($thought->getThinkerId()),
 			htmlspecialchars($thought->getThinkerId()));
-		$par = new Paragraph("By " . $a);
+		$par = new Paragraph("By $a ");
+		$thoughtDate = date("D, M j, Y", $thought->getDate());
+		$thoughtTime = date("g:i:s T", $thought->getDate());
+		$par->addContent("on $thoughtDate at $thoughtTime");
 		$output .= $par;
 
 		return $output;
 	}
 
 	//
-	// This function will print out one thought as a list element.
+	// This function will print out one thought as a results listing
 	// NOTE: make sure that the user has permission to see this thought
 	//       before calling this function on it!
 	//
 
-	function drawThoughtLi($thought)
+	function drawThoughtListing($thought)
 	{
-		$li=new ListElement();
-		$br=new LineBreak();
+		$div=new Div();
+		$div->set("class", "bubble result");
 
-		$li->addContent($this->getThoughtLink($thought));
-		$li->addContent($br);
-		$li->addContent("&nbsp;by ".htmlspecialchars($thought->getThinkerId()));
-		$li->addContent("&nbsp;(".date("M d, Y",$thought->getDate()).")");
+		$div->addContent($this->getThoughtLink($thought));
+		$div->addContent(new LineBreak());
+		$div->addContent("By ".htmlspecialchars($thought->getThinkerId()));
+		$div->addContent("&nbsp;(".date("M d, Y",$thought->getDate()).")");
 
 		if($thought->getPrivate()) {
-			$li->addContent("&nbsp;(private)");
+			$div->addContent("&nbsp;(private)");
 		}
 
-		return("" . $li);
+		return($div);
 
 	}
 

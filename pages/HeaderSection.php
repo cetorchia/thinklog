@@ -22,7 +22,6 @@ class HeaderSection extends Section
 
 		// Generate the HTML and return it.
 		$h = new Heading("1", $heading);
-		$h->set("style", "font-style: italic;");
 		return $h . $welcome;
 	}
 }

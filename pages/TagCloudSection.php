@@ -72,29 +72,51 @@ class TagCloudSection extends Section
 
 		// Render keywords
 		if ($keywords) {
-			$par = new Paragraph();
-			$par->addContent("${title1}Keywords${title2}: ");
+			$div = new Div();
+			$div->set("class", "bubble tag_cloud");
+			$div->set("style", "float: left");
+			$div->addContent("${title1}Keywords${title2}: <br />");
+			$first = true;
 			foreach($keywords as $keyword)
 			{
+				if ($first) {
+					$first = false;
+				} else {
+					$div->addContent(", &nbsp; ");
+				}
 				$link = new Anchor($formatService->getQueryURL($keyword),$keyword);
-				$par->addContent("$link &nbsp; ");
+				$div->addContent($link);
 			}
-			$output .= $par;
+			$output .= $div;
 		}
 
-		// Render keyword pairs
+		// Render keyword pairs ("relationships")
 		if ($keywordPairs) {
-			$par = new Paragraph();
-			$par->addContent("${title1}Keyword Pairs${title2}: ");
+			$div = new Div();
+			$div->set("class", "bubble tag_cloud");
+			$div->set("style", "float: left");
+			$div->addContent("${title1}Keyword Relationships${title2}: <br />");
+			$first = true;
 			foreach($keywordPairs as $keywordPair)
 			{
+				if ($first) {
+					$first = false;
+				} else {
+					$div->addContent(", &nbsp; ");
+				}
 				$keyword1 = $keywordPair[0];
 				$keyword2 = $keywordPair[1];
 				$link = new Anchor($formatService->getQueryURL("$keyword1 $keyword2"),
 				                   "$keyword1&nbsp;-&nbsp;$keyword2");
-				$par->addContent("$link &nbsp; ");
+				$div->addContent($link);
 			}
-			$output .= $par;
+			$output .= $div;
+		}
+
+		if ($keywords || $keywordPairs) {
+			$clearBoth = new Div("&nbsp;");
+			$clearBoth->set("style", "clear: both; font-size: 0");
+			$output .= $clearBoth;
 		}
 
 		return $output;

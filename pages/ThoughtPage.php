@@ -80,6 +80,7 @@ class ThoughtPage extends Page
 				$div->set("id","thought");
 				$div->set("class","section");
 
+				$div->addContent(new Heading("2", "Thought"));
 				$div->addContent($pageRenderService->drawThought($thought));
 				$output .= $div;
 
