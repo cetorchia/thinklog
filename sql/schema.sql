@@ -13,10 +13,11 @@ create table if not exists thinkers (
 
 create table if not exists thoughts (
 	thought_id integer primary key auto_increment,
-	content varchar(2048),
+	content varchar(512),
 	thinker_id varchar(64),
 	date timestamp default current_timestamp,
-	private tinyint
+	private tinyint,
+	UNIQUE(thinker_id, content)
 );
 
 create table if not exists keywords (

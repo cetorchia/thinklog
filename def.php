@@ -39,4 +39,4 @@ define("HASH_TAG_REGEX", '/(?:^|\s)\#([_\w]+)/');
 //
 
 define("DEFAULT_QUERY_RESULTS_PER_PAGE", 10);
-define("MAX_BODY_LENGTH", 2048);
+define("MAX_BODY_LENGTH", 512);
