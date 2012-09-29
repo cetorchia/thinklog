@@ -25,6 +25,11 @@ abstract class Page
 	// Override this to generate the page's content, given the logged in user, if any.
 	abstract function getContent();
 
+	// Override this to generate extra widgets for the side bar!
+	public function getSideBar() {
+		return "";
+	}
+
 	//
 	// This function prints the page requested for the given login,
 	// in HTML output.
@@ -36,7 +41,6 @@ abstract class Page
 		$headerSection = new HeaderSection($this->serverRequest, $this->services, $this->login);
 		$messagesSection = new MessagesSection($this->serverRequest, $this->services, $this->login);
 		$menuSection = new MenuSection($this->serverRequest, $this->services, $this->login);
-		$thinkerSection = new ThinkerSection($this->serverRequest, $this->services, $this->login);
 
 		// Get the context for this page
 		$GET = $this->serverRequest->getGET();
@@ -66,23 +70,33 @@ abstract class Page
 		//
 
 		$body = new Body();
+		$mainDiv = new Div();
+		$mainDiv->set("id", "main");
 
 		// Add the header, menu, and messages
-		$body->addContent($headerSection->draw());
-		$body->addContent($menuSection->draw());
-		$body->addContent($messagesSection->draw());
+		$mainDiv->addContent($headerSection->draw());
+		$mainDiv->addContent($messagesSection->draw());
 
 		// Add the overidden content
 		$content = new Div();
 		$content->set("id", "content");
 		$content->addContent($this->getContent());
-		$body->addContent($content);
+		$mainDiv->addContent($content);
 
-		// Add an about section if this is specific to a thinker.
+		$body->addContent($mainDiv);
+
+		// Menu, tag cloud, and thinker sections are on the sidebar
+		$sideBar = new Div();
+		$sideBar->set("id", "side_bar");
+		$sideBar->addContent($menuSection->draw());
+		$sideBar->addContent($this->getSideBar());
 		if(isset($GET["id"]) || isset($GET["thinker"]))
 		{
-			$body->addContent($thinkerSection->draw());
+			$thinkerSection = new ThinkerSection($this->serverRequest, $this->services, $this->login);
+			$sideBar->addContent($thinkerSection->draw());
 		}
+
+		$body->addContent($sideBar);
 
 		$html->addContent($body);
 

@@ -7,6 +7,7 @@ require_once(DOC_ROOT . "/pages/SearchPage.php");
 require_once(DOC_ROOT . "/pages/SignupPage.php");
 require_once(DOC_ROOT . "/pages/AddPage.php");
 require_once(DOC_ROOT . "/pages/LoginPage.php");
+require_once(DOC_ROOT . "/pages/AboutPage.php");
 
 /**
  * Takes a server request and decides what page to load.
@@ -19,6 +20,7 @@ class PageRequest
 	protected $query;
 	protected $signup;
 	protected $isLogin;
+	protected $about;
 
 	protected $serverRequest;
 	protected $services;
@@ -35,6 +37,7 @@ class PageRequest
 		$this->signup = isset($GET['signup']);
 		$this->addPage = isset($GET['add']);
 		$this->isLogin = isset($GET['login']);
+		$this->about = isset($GET['about']);
 
 		$this->serverRequest = $serverRequest;
 		$this->services = $services;
@@ -66,6 +69,11 @@ class PageRequest
 		else if($this->signup)
 		{
 			$page = new SignupPage($this->serverRequest, $this->services, $this->login);
+		}
+
+		else if($this->about)
+		{
+			$page = new AboutPage($this->serverRequest, $this->services, $this->login);
 		}
 
 		else if($this->isLogin)

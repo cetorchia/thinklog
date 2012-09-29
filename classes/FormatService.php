@@ -85,6 +85,12 @@ class FormatService
 		return THINKLOG_URL . "?signup";
 	}
 
+	// Get the Thinklog URL that will take you to the about page
+	public function getAboutURL()
+	{
+		return THINKLOG_URL . "?about";
+	}
+
 	//
 	// Gets an excerpt of the thought
 	//

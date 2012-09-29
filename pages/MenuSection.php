@@ -41,13 +41,13 @@ class MenuSection extends Section
 		$linksDiv->addContent((new Anchor(
 				$formatService->getAllURL(),
 				"All thoughts"
-		))." &nbsp; ");
+		))." <br />\n ");
 
 		// Link to home page
 		$linksDiv->addContent((new Anchor(
 				$formatService->getSearchPageURL(),
 				"Search"
-		))." &nbsp; ");
+		))." <br />\n ");
 
 		// Specific to current thinker
 		if(isset($thinker))
@@ -65,12 +65,12 @@ class MenuSection extends Section
 			$linksDiv->addContent((new Anchor(
 					$formatService->getThinkerAllURL($thinkerId),
 					htmlspecialchars($thinkerName) . "'s thoughts")
-			)." &nbsp; ");
+			)." <br />\n ");
 
 			$linksDiv->addContent((new Anchor(
 				$formatService->getThinkerURL($thinkerId),
 				htmlspecialchars($thinkerName) . "'s Thinklog")
-			)." &nbsp; ");
+			)." <br />\n ");
 		}
 
 		// Specific to logged-in thinker
@@ -79,15 +79,15 @@ class MenuSection extends Section
 			$linksDiv->addContent((new Anchor(
 					$formatService->getThinkerURL($login->getThinkerId()),
 					"My Thinklog"
-			))." &nbsp; ");
+			))." <br />\n ");
 			$linksDiv->addContent((new Anchor(
 					$formatService->getAddURL(),
 					"Add thoughts"
-			))." &nbsp; ");
+			))." <br />\n ");
 			$linksDiv->addContent((new Anchor(
 					$formatService->getLogoutURL(),
 					"Logout"
-			))." &nbsp; ");
+			))." <br />\n ");
 					
 		}
 
@@ -97,18 +97,24 @@ class MenuSection extends Section
 			$linksDiv->addContent((new Anchor(
 					$formatService->getLoginURL(),
 					"Login"
-			))." &nbsp; ");
+			))." <br />\n ");
 			$linksDiv->addContent((new Anchor(
 					$formatService->getSignUpURL(),
 					"Sign up"
-			))." &nbsp; ");
+			))." <br />\n ");
 		}
+
+		// Link to about page
+		$linksDiv->addContent((new Anchor(
+				$formatService->getAboutURL(),
+				"About"
+		))." <br />\n ");
 
 		// Link to home page
 		$linksDiv->addContent((new Anchor(
 				$formatService->getThinklogURL(),
 				"Home"
-		))." &nbsp; ");
+		))."  ");
 
 		$output .= $linksDiv;
 

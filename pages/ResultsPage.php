@@ -112,20 +112,27 @@ class ResultsPage extends Page
 		$div->addContent("<a href=\"$rssURL\">RSS feed</a>");
 		$div->addContent("</p>\n");
 
-		// Put a tag cloud up top
-		if(!$query) {
-			$tagCloudSection = new TagCloudSection($this->serverRequest,$this->services,$this->login,
-			                                       $thinkerId);
-			$output .= "".($tagCloudSection->draw()) . "\n";
-		} else {
-			$tagCloudSection = new TagCloudSection($this->serverRequest,$this->services,$this->login,
-			                                       $thinkerId, null, $query);
-			$output .= "".($tagCloudSection->draw()) . "\n";
-		}
-
 		// Then output the results div
 		$output .= "".$div;
 
 		return $output;
+	}
+
+	public function getSideBar()
+	{
+		$GET = $this->serverRequest->getGET();
+		$query = isset($GET["q"])?$GET["q"]:null;
+		$thinkerId = isset($GET["thinker"])?$GET["thinker"]:null;
+
+		// Put a tag cloud up
+		if(!$query) {
+			$tagCloudSection = new TagCloudSection($this->serverRequest,$this->services,$this->login,
+			                                       $thinkerId);
+		} else {
+			$tagCloudSection = new TagCloudSection($this->serverRequest,$this->services,$this->login,
+			                                       $thinkerId, null, $query);
+		}
+
+		return $tagCloudSection->draw();
 	}
 }

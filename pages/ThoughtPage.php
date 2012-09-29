@@ -64,11 +64,6 @@ class ThoughtPage extends Page
 			}
 		}
 
-		// Add a tag cloud
-		$tagCloudSection = new TagCloudSection($this->serverRequest,$this->services,$this->login,
-		                                       null, $thoughtId);
-		$output .= "".($tagCloudSection->draw()) . "\n";
-
 		//
 		// Display the thought, if there is one.
 		//
@@ -119,5 +114,17 @@ class ThoughtPage extends Page
 		}
 
 		return $output;
+	}
+
+	public function getSideBar()
+	{
+		$GET = $this->serverRequest->getGET();
+		$thoughtId = isset($GET["id"]) ? $GET["id"] : null;
+
+		// Add a tag cloud
+		$tagCloudSection = new TagCloudSection($this->serverRequest,$this->services,$this->login,
+		                                       null, $thoughtId);
+
+		return $tagCloudSection->draw();
 	}
 }

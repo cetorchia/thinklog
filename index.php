@@ -50,6 +50,3 @@ $documentRequest = new DocumentRequest($serverRequest, $services, $login);
 $documentRequest->execute();
 
 $dbConnectionService->close();
-
-// Print running time
-echo "<p>" . $timerService->read('total') . " seconds</p>\n";

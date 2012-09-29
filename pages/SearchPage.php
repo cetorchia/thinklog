@@ -32,8 +32,8 @@ class SearchPage extends Page
 
 		$output .= new Notice(NOTICE_SEARCH);
 		$output .= "<form method=\"get\" action=\"" . $formatService->getThinklogURL() . "\">\n";
-		$output .= "<input type=\"text\" value=\"\" name=\"q\" style=\"width: 50%\" />\n";
-		$output .= "<input type=\"submit\" value=\"search\" />\n";
+		$output .= "<input type=\"text\" value=\"\" name=\"q\" style=\"width: 50%; height: 2em;\" />\n";
+		$output .= "<input type=\"submit\" value=\"search\" style=\"height:2em\"/>\n";
 		$output .= "<br />\n";
 
 		if(isset($thinkerId))

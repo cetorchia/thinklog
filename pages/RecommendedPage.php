@@ -41,10 +41,6 @@ class RecommendedPage extends Page
 			$thinkerId = $this->login->getThinkerId();
 		}
 
-		// Add a tag cloud
-		$tagCloudSection = new TagCloudSection($this->serverRequest,$this->services,$this->login, $thinkerId);
-		$output .= "".($tagCloudSection->draw()) . "\n";
-
 		//
 		// Display the recommended thoughts for the given thinker if any.
 		//
@@ -80,5 +76,20 @@ class RecommendedPage extends Page
 		}
 
 		return $output;
+	}
+
+	public function getSideBar()
+	{
+		$GET = $this->serverRequest->getGET();
+		$thinkerId = isset($GET["thinker"]) ? $GET["thinker"] : null;
+		if((!isset($thinkerId)) && (isset($this->login)))
+		{
+			$thinkerId = $this->login->getThinkerId();
+		}
+
+		// Add a tag cloud
+		$tagCloudSection = new TagCloudSection($this->serverRequest,$this->services,$this->login, $thinkerId);
+
+		return $tagCloudSection->draw();
 	}
 }

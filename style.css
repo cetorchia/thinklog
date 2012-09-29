@@ -78,6 +78,17 @@ li {
 /*
  * Content
  */
+div#main {
+	max-width: 700px;
+	width: 70%;
+	float: left;
+}
+
+div#side_bar {
+	max-width: 300px;
+	width: 25%;
+	float: left;
+}
 
 div.section, div.section td {
 	background: #fff;
@@ -85,8 +96,8 @@ div.section, div.section td {
 }
 
 div.section {
-	padding:    1em;
-	margin:     0.5em;
+	padding: 1em;
+	margin: 0.5em;
 	border-radius: 3px;
 	-moz-border-radius: 3px;
 }
@@ -110,7 +121,7 @@ div.notice {
 	border: 1px solid #88a;
 	color: #335;
 	background: #eef;
-	width: 75%;
+	width: 90%;
 }
 
 /*
@@ -137,7 +148,6 @@ div.bubble {
 
 div.tag_cloud {
 	margin: 5px;
-	width:45%;
 }
 
 /* Thought page */
@@ -150,9 +160,29 @@ div.thought_body {
 /* Query results */
 
 div.result {
-	width:75%;
+	width:90%;
 }
 
 div.result a:link, div.result a:visited, div.result a:hover, div.result a:active {
 	font-size: 1.2em;
+}
+
+/* About section */
+
+div#about {
+	max-width:640px;
+	font-size: 1.2em;
+	line-height: 1.7em;
+	color: #444;
+}
+
+/* Menu links */
+
+div#links {
+	line-height: 1.7em;
+	font-size: 1.1em;
+}
+
+div#links a:link, div#links a:visited {
+	color: #117;
 }
