@@ -55,10 +55,10 @@ class FormatService
 		return THINKLOG_URL . "?add";
 	}
 
-	// Get the Thinklog URL that will take you to the query page
-	public function getQueryPageURL()
+	// Get the Thinklog URL that will take you to the search page
+	public function getSearchPageURL()
 	{
-		return THINKLOG_URL . "?query";
+		return THINKLOG_URL . "?search";
 	}
 
 	// Get the Thinklog URL that will take you to the logout page

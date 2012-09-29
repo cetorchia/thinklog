@@ -3,7 +3,7 @@
 require_once(DOC_ROOT . "/pages/RecommendedPage.php");
 require_once(DOC_ROOT . "/pages/ThoughtPage.php");
 require_once(DOC_ROOT . "/pages/ResultsPage.php");
-require_once(DOC_ROOT . "/pages/QueryPage.php");
+require_once(DOC_ROOT . "/pages/SearchPage.php");
 require_once(DOC_ROOT . "/pages/SignupPage.php");
 require_once(DOC_ROOT . "/pages/AddPage.php");
 require_once(DOC_ROOT . "/pages/LoginPage.php");
@@ -31,7 +31,7 @@ class PageRequest
 		$this->thinkerId = isset($GET['thinker']) ? $GET['thinker'] : null;
 		$this->thought = isset($GET['id']);
 		$this->query = isset($GET['q']);
-		$this->queryPage = isset($GET['query']);
+		$this->searchPage = isset($GET['search']);
 		$this->signup = isset($GET['signup']);
 		$this->addPage = isset($GET['add']);
 		$this->isLogin = isset($GET['login']);
@@ -78,9 +78,9 @@ class PageRequest
 			$page = new AddPage($this->serverRequest, $this->services, $this->login);
 		}
 
-		else if($this->queryPage)
+		else if($this->searchPage)
 		{
-			$page = new QueryPage($this->serverRequest, $this->services, $this->login);
+			$page = new SearchPage($this->serverRequest, $this->services, $this->login);
 		}
 
 		else if($this->thinkerId)

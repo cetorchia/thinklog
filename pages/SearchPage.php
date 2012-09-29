@@ -2,8 +2,9 @@
 
 require_once(DOC_ROOT . "/lib/html.php");
 require_once(DOC_ROOT . "/pages/Page.php");
+require_once(DOC_ROOT . "/pages/Notice.php");
 
-class QueryPage extends Page
+class SearchPage extends Page
 {
 	public function getContent()
 	{
@@ -27,16 +28,12 @@ class QueryPage extends Page
 			$thinker = $thinkerService->getThinker($thinkerId);
 		}
 
-		if(isset($login))
-		{
-			$loginThinker = $thinkerService->getThinker($login->getThinkerId());
-		}
-
 		// The search markup
 
+		$output .= new Notice(NOTICE_SEARCH);
 		$output .= "<form method=\"get\" action=\"" . $formatService->getThinklogURL() . "\">\n";
-		$output .= "<input type=\"text\" value=\"\" name=\"q\" />\n";
-		$output .= "<input type=\"submit\" value=\"search\" style=\"width: 25%\" />\n";
+		$output .= "<input type=\"text\" value=\"\" name=\"q\" style=\"width: 50%\" />\n";
+		$output .= "<input type=\"submit\" value=\"search\" />\n";
 		$output .= "<br />\n";
 
 		if(isset($thinkerId))

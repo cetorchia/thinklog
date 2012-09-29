@@ -45,8 +45,8 @@ class MenuSection extends Section
 
 		// Link to home page
 		$linksDiv->addContent((new Anchor(
-				$formatService->getQueryPageURL(),
-				"Query"
+				$formatService->getSearchPageURL(),
+				"Search"
 		))." &nbsp; ");
 
 		// Specific to current thinker

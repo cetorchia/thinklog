@@ -7,6 +7,7 @@ require_once(DOC_ROOT."/classes/ThinkerService.php");
 require_once(DOC_ROOT."/classes/ThoughtService.php");
 require_once(DOC_ROOT."/classes/QueryService.php");
 require_once(DOC_ROOT."/pages/Page.php");
+require_once(DOC_ROOT."/pages/Notice.php");
 require_once(DOC_ROOT."/pages/TagCloudSection.php");
 
 class RecommendedPage extends Page
@@ -63,6 +64,7 @@ class RecommendedPage extends Page
 			$recommendedDiv->set("class","section");
 
 			$recommendedDiv->addContent("<h2>Recommended thoughts for $thinkerName</h2>");
+			$recommendedDiv->addContent(new Notice(NOTICE_RESULTS));
 
 			$recommendedDiv->addContent("<p>");
 			$thoughts = $queryService->getRecommended($login, 0, DEFAULT_QUERY_RESULTS_PER_PAGE, $thinkerId);

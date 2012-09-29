@@ -1,5 +1,6 @@
 <?php
 require_once(DOC_ROOT . "/pages/Page.php");
+require_once(DOC_ROOT . "/pages/Notice.php");
 
 class AddPage extends Page
 {
@@ -10,6 +11,7 @@ class AddPage extends Page
 		$addDiv = new Div();
 		$addDiv->set("class","section");
 		$s = "<h1>What's on your mind?</h1>\n";
+		$s .= new Notice(NOTICE_ADD_THOUGHTS);
 		$s .= "<form method=\"POST\" action=\"./\">\n";
 		$s .= "<input type=\"hidden\" name=\"add\" value=\"1\" />\n";
 		$s .= "<textarea rows=\"5\" cols=\"60\" name=\"body\"></textarea>\n";

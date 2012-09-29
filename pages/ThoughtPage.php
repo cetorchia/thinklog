@@ -7,6 +7,7 @@ require_once(DOC_ROOT."/classes/ThinkerService.php");
 require_once(DOC_ROOT."/classes/ThoughtService.php");
 require_once(DOC_ROOT."/classes/QueryService.php");
 require_once(DOC_ROOT."/pages/Page.php");
+require_once(DOC_ROOT."/pages/Notice.php");
 require_once(DOC_ROOT."/pages/TagCloudSection.php");
 
 class ThoughtPage extends Page
@@ -93,6 +94,7 @@ class ThoughtPage extends Page
 				$relatedDiv->set("class","section");
 
 				$relatedDiv->addContent("<h2>Related thoughts</h2>");
+				$relatedDiv->addContent(new Notice(NOTICE_RESULTS));
 
 				$relatedDiv->addContent("<p>");
 				$thoughts = $queryService->getRelated($login, 0, DEFAULT_QUERY_RESULTS_PER_PAGE, $thoughtId);

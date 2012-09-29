@@ -7,6 +7,7 @@ require_once(DOC_ROOT."/classes/ThinkerService.php");
 require_once(DOC_ROOT."/classes/ThoughtService.php");
 require_once(DOC_ROOT."/classes/QueryService.php");
 require_once(DOC_ROOT."/pages/Page.php");
+require_once(DOC_ROOT."/pages/Notice.php");
 require_once(DOC_ROOT."/pages/TagCloudSection.php");
 
 class ResultsPage extends Page
@@ -60,9 +61,12 @@ class ResultsPage extends Page
 
 		$div->addContent("</h2>\n");
 
-		//
-		// Do query
-		//
+		// Say what to do with these thoughts!
+		$div->addContent(new Notice(NOTICE_RESULTS));
+
+		/*
+		 * Do query
+		 */
 
 		$div->addContent("<p>\n");
 
@@ -73,9 +77,9 @@ class ResultsPage extends Page
 
 		$div->addContent("</p>\n");
 
-		//
-		// Page URLs
-		//
+		/*
+		 * Page URLs
+		 */
 
 		$url = "./?q=".urlencode($query);
 		$url .= isset($thinkerId)?("&thinker=".urlencode($thinkerId)):"";

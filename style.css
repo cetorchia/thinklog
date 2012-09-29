@@ -2,60 +2,14 @@
  * Thinklog style sheet
  */
 
-
-/*
- * --- Content containers ---
- */
-
-
 /* body */
 
-body,td {
+body {
 	background:  #557;
 	color:       #000;
 	font-size:   85%;
 	font-family: sans-serif;
 }
-
-.section,.section td {
-	background: #fff;
-	color:      #000;
-}
-
-.section {
-	padding:    1em;
-	margin:     0.5em;
-	border-radius: 3px;
-	-moz-border-radius: 3px;
-}
-
-
-/*
- * messages
- */
-
-.thot_error {
-	color: #c11;
-}
-
-.thot_success {
-	color: #1a1;
-}
-
-
-/*
- * copyright
- */
-
-#copyright {
-	font-size: 80%;
-}
-
-
-/*
- * ---- Basic but essential elements. ----
- */
-
 
 /*
  * headers
@@ -119,6 +73,52 @@ a img {
 
 li {
 	padding-bottom: 3px;
+}
+
+/*
+ * Content
+ */
+
+div.section, div.section td {
+	background: #fff;
+	color:      #000;
+}
+
+div.section {
+	padding:    1em;
+	margin:     0.5em;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+}
+
+
+/*
+ * Messages
+ */
+
+.thot_error {
+	color: #c11;
+}
+
+.thot_success {
+	color: #1a1;
+}
+
+div.notice {
+	padding: 3px 10px 3px 10px;
+	margin: 5px;
+	border: 1px solid #88a;
+	color: #335;
+	background: #eef;
+	width: 75%;
+}
+
+/*
+ * copyright
+ */
+
+#copyright {
+	font-size: 80%;
 }
 
 /* Bubbles */

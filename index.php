@@ -2,6 +2,7 @@
 
 require_once("def.php");
 require_once("error.php");
+require_once("messages.php");
 require_once(DOC_ROOT . "/classes/AppServices.php");
 require_once(DOC_ROOT . "/classes/DBConnectionService.php");
 require_once(DOC_ROOT . "/classes/LoginRequest.php");
