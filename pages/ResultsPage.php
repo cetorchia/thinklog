@@ -53,7 +53,7 @@ class ResultsPage extends Page
 
 		$div->addContent("<h2>\n");
 		$div->addContent(
-			htmlspecialchars((!isset($query)) || (strlen($query)==0) ? "All Thoughts":"Query \"".$query."\"")." "
+			htmlspecialchars((!isset($query)) || (strlen($query)==0) ? "All Thoughts":"Search results for \"".$query."\"")." "
 		);
 		if(isset($thinker)) {
 			$div->addContent("By ".htmlspecialchars($thinker->getName()));
