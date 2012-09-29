@@ -126,7 +126,7 @@ class QueryService
 		         "     AND k.keyword IN ($wordlist) " .
 		         "     $thinkerClause)) tbl " .
 		         "GROUP BY thought_id " .
-		         "ORDER BY (COUNT(DISTINCT mk) + COUNT(DISTINCT rk))*AVG(idf) DESC " .
+		         "ORDER BY (COUNT(DISTINCT mk) + COUNT(DISTINCT rk))*AVG(idf) DESC, date DESC " .
 		         "LIMIT ".($num+1)." OFFSET $start ";
 
 		return mysql_query($query);
@@ -161,7 +161,7 @@ class QueryService
 		         "     AND m1.thought_id <> t.thought_id " .
 		         "     AND i.keyword_id = m2.keyword_id)) tbl " .
 		         "GROUP BY thought_id " .
-		         "ORDER BY (COUNT(DISTINCT mk) + COUNT(DISTINCT rk))*AVG(idf) DESC " .
+		         "ORDER BY (COUNT(DISTINCT mk) + COUNT(DISTINCT rk))*AVG(idf) DESC, date DESC " .
 		         "LIMIT ".($num+1)." OFFSET $start ";
 		return mysql_query($query);
 	}
@@ -190,7 +190,7 @@ class QueryService
 		         "     AND m1.keyword_id = r.keyword1 AND m2.keyword_id = r.keyword2 " .
 		         "     AND i.keyword_id = m2.keyword_id)) tbl " .
 		         "GROUP BY thought_id " .
-		         "ORDER BY (COUNT(DISTINCT mk) + COUNT(DISTINCT rk))*AVG(idf) DESC " .
+		         "ORDER BY (COUNT(DISTINCT mk) + COUNT(DISTINCT rk))*AVG(idf) DESC, date DESC " .
 		         "LIMIT ".($num+1)." OFFSET $start ";
 		return mysql_query($query);
 	}
