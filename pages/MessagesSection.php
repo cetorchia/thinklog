@@ -7,6 +7,8 @@ class MessagesSection
 	protected $think;
 	protected $notLogin;
 	protected $tooLong;
+	protected $noThoughts;
+	protected $invalidURL;
 	protected $error;
 	protected $success;
 
@@ -16,6 +18,8 @@ class MessagesSection
 		$this->think = isset($GET["think"]);
 		$this->notLogin = isset($GET["notLogin"]);
 		$this->tooLong = isset($GET["tooLong"]);
+		$this->noThoughts = isset($GET["noThoughts"]);
+		$this->invalidURL = isset($GET["invalidURL"]);
 		$this->error = isset($GET["error"]);
 		$this->success = isset($GET["success"]);
 	}
@@ -47,7 +51,26 @@ class MessagesSection
 
 				$output = "" . $par;
 			}
+			if($this->noThoughts)
+			{
+				$par = new Paragraph();
+				$span = new Span();
+				$span->set("class", "thot_error");
+				$span->setContent("I could not add your thoughts: you did not specify any thoughts!");
+				$par->setContent($span);
 
+				$output = "" . $par;
+			}
+			if($this->invalidURL)
+			{
+				$par = new Paragraph();
+				$span = new Span();
+				$span->set("class", "thot_error");
+				$span->setContent("I could not add your thoughts: you did not specify a proper URL!");
+				$par->setContent($span);
+
+				$output = "" . $par;
+			}
 			if($this->error)
 			{
 				$par = new Paragraph();

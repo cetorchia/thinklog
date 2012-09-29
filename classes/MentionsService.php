@@ -72,25 +72,25 @@ class MentionsService
 	{
 		$thoughtId = $thought->getId();
 		$keywords = $this->keywordService->getKeywords($thought->getBody());
-		if (!$keywords)
+		if (!$keywords) {
 			return;
+		}
 
 		// Add the keywords to the DB if necessary
-		$this->keywordService->addKeywords($keywords);
-
-		if($doEcho) {
-			foreach($keywords as $keyword)
-			{
-				echo "    mentioning $keyword\n";	// Tell the user
-			}
+		$this->keywordService->addKeywords($keywords, $doEcho);
+		$keywordList = $this->keywordService->getKeywordsSQL($keywords);
+		if ($doEcho) {
+			echo "    mentioning $keywordList\n";	// Tell the user
 		}
 
 		// Add records for the thought mentioning each of these keywords.
 		$query = "INSERT IGNORE INTO mentions (thought_id, keyword_id) " .
 		         "SELECT $thoughtId, keyword_id FROM keywords " .
-		         "WHERE keyword IN (" . $this->keywordService->getKeywordsSQL($keywords) .")";
+		         "WHERE keyword IN ($keywordList)";
 		if (!mysql_query($query)) {
-			echo "  warning: " . mysql_error() . "\n";
+			if ($doEcho) {
+				echo "  warning: " . mysql_error() . "\n";
+			}
 		}
 	}
 }

@@ -4,6 +4,7 @@ require_once(DOC_ROOT . "/classes/TimerService.php");
 require_once(DOC_ROOT . "/classes/FormatService.php");
 require_once(DOC_ROOT . "/classes/ThinkerService.php");
 require_once(DOC_ROOT . "/classes/ThoughtService.php");
+require_once(DOC_ROOT . "/classes/AddService.php");
 require_once(DOC_ROOT . "/classes/KeywordService.php");
 require_once(DOC_ROOT . "/classes/MentionsService.php");
 require_once(DOC_ROOT . "/classes/QueryService.php");
@@ -27,6 +28,7 @@ class AppServices
 		$this->keywordService = new KeywordService($this);
 		$this->queryService = new QueryService($this);
 		$this->mentionsService = new MentionsService($this);
+		$this->addService = new AddService($this);
 		$this->tagCloudService = new TagCloudService($this);
 		$this->loginService = new LoginService($this);
 		$this->pageRenderService = new PageRenderService($this);

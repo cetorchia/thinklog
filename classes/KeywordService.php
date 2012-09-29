@@ -13,13 +13,12 @@ class KeywordService
 	}
 
 	// Adds a keyword node with this label to the database
-	public function addKeywords($keywords)
+	public function addKeywords($keywords, $doEcho=false)
 	{
 		// Check if they're in the cache
 		foreach($keywords as $keyword) {
 			if($this->keywords[$keyword])
 			{
-				echo "  $keyword is cached as a keyword\n";
 				unset($keywords[$keyword]);
 			}
 		}
@@ -29,17 +28,17 @@ class KeywordService
 
 		// The rest of the keywords need to be cached
 		foreach($keywords as $keyword) {
-			echo "  caching $keyword as a keyword\n";
 			$this->keywords[$keyword] = $keyword;
 		}
 
 		// Try to put the so-far unseen keywords in the database
 		$query = "INSERT IGNORE INTO keywords (keyword) " .
 		         "VALUES " . $this->getKeywordTuplesSQL($keywords);
-		echo "  adding these keywords\n";
 		if (!mysql_query($query)) {
-			echo "  warning: could not add keywords ".$this->getKeywordsSQL($keywords).": \n"; 
-			echo "           " . mysql_error() . "\n";
+			if ($doEcho) {
+				echo "  warning: could not add these keywords:\n"; 
+				echo "           " . mysql_error() . "\n";
+			}
 		}
 	}
 
@@ -81,7 +80,6 @@ class KeywordService
 			$word = $row["keyword"];
 			$keywords[$word] = $word;
 			$this->keywords[$word] = $word;
-			echo "  $word is a common keyword\n";
 		}
 	}
 
