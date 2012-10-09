@@ -32,6 +32,11 @@ create table if not exists mentions (
 	UNIQUE (thought_id, keyword_id)
 );
 
+create table if not exists sentiment (
+	word varchar(64),
+	value float
+);
+
 create or replace view keyword_count
 as select keyword_id, count(thought_id) as cnt
    from mentions

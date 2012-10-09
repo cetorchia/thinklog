@@ -20,6 +20,7 @@ abstract class Services
 	public $commonKeywordService;
 	public $wikipediaKeywordService;
 	public $tagCloudService;
+	public $sentimentService;
 
 	// Initialize the services.
 	abstract public function __construct();

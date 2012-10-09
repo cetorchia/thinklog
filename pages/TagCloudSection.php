@@ -26,6 +26,7 @@ class TagCloudSection extends Section
 
 		// Some services and context we might need.
 		$formatService = $this->services->formatService;
+		$sentimentService = $this->services->sentimentService;
 		$tagCloudService = $this->services->tagCloudService;
 		$thinkerService = $this->services->thinkerService;
 		$GET = $this->serverRequest->getGET();
@@ -47,6 +48,14 @@ class TagCloudSection extends Section
 			foreach ($keywordPairs as $keywordPair) {
 				$keywords[] = array("keyword" => $keywordPair["kw2"],
 				                    "cnt" => $keywordPair["cnt"]);
+			}
+		}
+
+		// Look up sentiment
+		if ($keywords) {
+			$sentiment = $sentimentService->getAverageSentiment($keywords);
+			foreach ($keywords as $i => $row) {
+				$keywords[$i]["sentiment"] = $sentimentService->getSentiment($row["keyword"]);
 			}
 		}
 
@@ -73,6 +82,25 @@ class TagCloudSection extends Section
 
 		// Render keywords
 		if ($keywords) {
+			// Div for sentiment value
+			$div = new Div();
+			$div->set("class", "bubble tag_cloud");
+			$div->set("style", "float: left");
+			$div->addContent("${title1}Sentiment{$title2}: <br />");
+			$span = new Span();
+			$span->set("style", $this->_getSentimentStyle($sentiment, true));
+			if ($sentiment >= 0.5) {
+				$span->addContent("Positive");
+			} else if ($sentiment <= -0.50) {
+				$span->addContent("Negative");
+			} else {
+				$span->addContent("Neutral");
+			}
+			$span->addContent(" ($sentiment)");
+			$div->addContent($span);
+			$output .= $div;
+
+			// Div for prominent keywords
 			$div = new Div();
 			$div->set("class", "bubble tag_cloud");
 			$div->set("style", "float: left");
@@ -88,7 +116,8 @@ class TagCloudSection extends Section
 				$keyword = $row["keyword"];
 				$count = $row["cnt"] * 5;
 				$link = new Anchor($formatService->getQueryURL($keyword),$keyword);
-				$link->set("style", "font-size: 1.${count}em");
+				$link->set("style", "font-size: 1.${count}em; " .
+				                    $this->_getSentimentStyle($row["sentiment"]));
 				$div->addContent($link);
 			}
 			$output .= $div;
@@ -126,6 +155,27 @@ class TagCloudSection extends Section
 		}
 
 		return $output;
+	}
+
+	// Given sentiment from -1.0 to 1.0, return CSS style
+	// for text expressing this sentiment.
+	// @param $sentiment Sentiment value
+	// @param $size Boolean whether to make text bigger when sentiment is stronger
+	//              (i.e. the magnitude of its absolute value is higher)
+	protected function _getSentimentStyle($sentiment, $size=false) {
+		if ($sentiment >= 0.5) {
+			$colour = "green";
+		} else if ($sentiment <= -0.5) {
+			$colour = "red";
+		} else {
+			$colour = "black";
+		}
+		$style = "color: $colour;";
+		if ($size) {
+			$fontSize = round(abs($sentiment) * 5);
+			$style .= " font-size: 1.${fontSize}em;";
+		}
+		return $style;
 	}
 
 	public function draw()

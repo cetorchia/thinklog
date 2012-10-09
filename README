@@ -1,0 +1,14 @@
+WHAT YOU NEED
+=============
+
+ESSENTIALS
+- PHP 5, Apache
+- Set def.php constants to point to your working directory, etc.
+
+DATABASE
+- MySQL database
+- Run sql/schema.sql in your database
+- Set def.php constants to point to your database
+- SentiWordNet_3.0.0_20120510.txt in etc/
+  (Get at http://sentiwordnet.isti.cnr.it/)
+- Run sentiment.php (populates word sentiment table with SentiWordNet)
