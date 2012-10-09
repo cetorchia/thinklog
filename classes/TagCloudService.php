@@ -22,29 +22,32 @@ class TagCloudService
 	{
 		// Query for keywords related to this thought and thinker
 		if($thinkerId) {
-			$query = "SELECT DISTINCT keyword " .
+			$query = "SELECT keyword, cnt " .
 			         "FROM keywords, keyword_count, mentions, thoughts " .
 			         "WHERE keywords.keyword_id = keyword_count.keyword_id " .
 			         "  AND keywords.keyword_id = mentions.keyword_id " .
 			         "  AND thoughts.thought_id = mentions.thought_id " .
 			         "  AND thoughts.thinker_id = '$thinkerId' " .
+			         "GROUP BY keyword " .
 			         "ORDER BY cnt DESC " .
 			         "LIMIT 5 ";
 		}
 		else if($thoughtId) {
-			$query = "SELECT DISTINCT keyword " .
+			$query = "SELECT keyword, cnt " .
 			         "FROM keywords, keyword_count, mentions, thoughts " .
 			         "WHERE keywords.keyword_id = keyword_count.keyword_id " .
 			         "  AND keywords.keyword_id = mentions.keyword_id " .
 			         "  AND thoughts.thought_id = mentions.thought_id " .
 			         "  AND thoughts.thought_id = $thoughtId " .
+			         "GROUP BY keyword " .
 			         "ORDER BY cnt DESC " .
 			         "LIMIT 5 ";
 		}
 		else {
-			$query = "SELECT DISTINCT keyword " .
+			$query = "SELECT keyword, cnt " .
 			         "FROM keywords, keyword_count " .
 			         "WHERE keywords.keyword_id = keyword_count.keyword_id " .
+			         "GROUP BY keyword " .
 			         "ORDER BY cnt DESC " .
 			         "LIMIT 5 ";
 		}
@@ -53,7 +56,16 @@ class TagCloudService
 		// Get the keywords
 		$keywords = array();
 		while ($row = mysql_fetch_array($result)) {
-			$keywords[] = $row["keyword"];
+			if (!isset($max) || $max < $row["cnt"]) {
+				$max = $row["cnt"];
+			}
+			$keywords[] = $row;
+		}
+		// Normalize the counts
+		if (isset($max)) {
+			foreach ($keywords as $i => $row) {
+				$keywords[$i]["cnt"] = round($row["cnt"] / $max);
+			}
 		}
 
 		return($keywords);
@@ -71,7 +83,7 @@ class TagCloudService
 			$wordlist = $this->keywordService->getKeywordsSQL($words);
 
 			if ($thinkerId) {
-				$query = "SELECT DISTINCT k1.keyword as kw1, k2.keyword as kw2 " .
+				$query = "SELECT k1.keyword as kw1, k2.keyword as kw2, cnt " .
 				         "FROM keywords k1, keywords k2, keyword_pair_count, mentions, thoughts " .
 				         "WHERE k1.keyword IN ($wordlist) " .
 				         "  AND k1.keyword_id = keyword_pair_count.keyword1 " .
@@ -79,21 +91,23 @@ class TagCloudService
 				         "  AND k1.keyword_id = mentions.keyword_id " .
 			        	 "  AND thoughts.thought_id = mentions.thought_id " .
 				         "  AND thoughts.thinker_id = '$thinkerId' " .
+				         "GROUP BY k1.keyword, k2.keyword " .
 				         "ORDER BY cnt DESC " .
 				         "LIMIT 5 ";
 			}
 			else {
-				$query = "SELECT DISTINCT k1.keyword as kw1, k2.keyword as kw2 " .
+				$query = "SELECT k1.keyword as kw1, k2.keyword as kw2, cnt " .
 				         "FROM keywords k1, keywords k2, keyword_pair_count " .
 				         "WHERE k1.keyword IN ($wordlist) " .
 				         "  AND k1.keyword_id = keyword_pair_count.keyword1 " .
 				         "  AND k2.keyword_id = keyword_pair_count.keyword2 " .
+				         "GROUP BY k1.keyword, k2.keyword " .
 				         "ORDER BY cnt DESC " .
 				         "LIMIT 5 ";
 			}
 		}
 		else if($thinkerId) {
-			$query = "SELECT DISTINCT k1.keyword as kw1, k2.keyword as kw2 " .
+			$query = "SELECT k1.keyword as kw1, k2.keyword as kw2, cnt " .
 			         "FROM keywords k1, keywords k2, keyword_pair_count, " .
 			         "     mentions m1, mentions m2, thoughts t1, thoughts t2 " .
 			         "WHERE k1.keyword_id = keyword_pair_count.keyword1 " .
@@ -105,11 +119,12 @@ class TagCloudService
 			         "  AND t1.thinker_id = '$thinkerId' " .
 			         "  AND t2.thinker_id = '$thinkerId' " .
 			         "  AND k1.keyword < k2.keyword " .
+			         "GROUP BY k1.keyword, k2.keyword " .
 			         "ORDER BY cnt DESC " .
 			         "LIMIT 5 ";
 		}
 		else if($thoughtId) {
-			$query = "SELECT DISTINCT k1.keyword as kw1, k2.keyword as kw2 " .
+			$query = "SELECT k1.keyword as kw1, k2.keyword as kw2, cnt " .
 			         "FROM keywords k1, keywords k2, keyword_pair_count, " .
 			         "     mentions m1, mentions m2, thoughts t1, thoughts t2 " .
 			         "WHERE k1.keyword_id = keyword_pair_count.keyword1 " .
@@ -121,15 +136,17 @@ class TagCloudService
 			         "  AND t1.thought_id = $thoughtId " .
 			         "  AND t2.thought_id = $thoughtId " .
 			         "  AND k1.keyword < k2.keyword " .
+			         "GROUP BY k1.keyword, k2.keyword " .
 			         "ORDER BY cnt DESC " .
 			         "LIMIT 5 ";
 		}
 		else {
-			$query = "SELECT DISTINCT k1.keyword as kw1, k2.keyword as kw2 " .
+			$query = "SELECT k1.keyword as kw1, k2.keyword as kw2, cnt " .
 			         "FROM keywords k1, keywords k2, keyword_pair_count " .
 			         "WHERE k1.keyword_id = keyword_pair_count.keyword1 " .
 			         "  AND k2.keyword_id = keyword_pair_count.keyword2 " .
 			         "  AND k1.keyword < k2.keyword " .
+			         "GROUP BY k1.keyword, k2.keyword " .
 			         "ORDER BY cnt DESC " .
 			         "LIMIT 5 ";
 		}
@@ -138,8 +155,16 @@ class TagCloudService
 		// Get the keyword pairs
 		$keywordPairs = array();
 		while ($row = mysql_fetch_array($result)) {
-			
-			$keywordPairs[] = array($row["kw1"], $row["kw2"]);
+			if (!isset($max) || $max < $row["cnt"]) {
+				$max = $row["cnt"];
+			}
+			$keywordPairs[] = $row;
+		}
+		// Normalize the counts
+		if (isset($max)) {
+			foreach ($keywordPairs as $i => $row) {
+				$keywordPairs[$i]["cnt"] = round($row["cnt"] / $max);
+			}
 		}
 
 		return($keywordPairs);

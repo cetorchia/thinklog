@@ -45,7 +45,8 @@ class TagCloudSection extends Section
 			$keywordPairs = $tagCloudService->getKeywordPairs($thinkerId, $thoughtId, $query);
 			$keywords = array();
 			foreach ($keywordPairs as $keywordPair) {
-				$keywords[] = $keywordPair[1];
+				$keywords[] = array("keyword" => $keywordPair["kw2"],
+				                    "cnt" => $keywordPair["cnt"]);
 			}
 		}
 
@@ -77,14 +78,17 @@ class TagCloudSection extends Section
 			$div->set("style", "float: left");
 			$div->addContent("${title1}Keywords${title2}: <br />");
 			$first = true;
-			foreach($keywords as $keyword)
+			foreach($keywords as $row)
 			{
 				if ($first) {
 					$first = false;
 				} else {
-					$div->addContent(", &nbsp; ");
+					$div->addContent(" &nbsp; ");
 				}
+				$keyword = $row["keyword"];
+				$count = $row["cnt"] * 5;
 				$link = new Anchor($formatService->getQueryURL($keyword),$keyword);
+				$link->set("style", "font-size: 1.${count}em");
 				$div->addContent($link);
 			}
 			$output .= $div;
@@ -97,17 +101,19 @@ class TagCloudSection extends Section
 			$div->set("style", "float: left");
 			$div->addContent("${title1}Keyword Relationships${title2}: <br />");
 			$first = true;
-			foreach($keywordPairs as $keywordPair)
+			foreach($keywordPairs as $row)
 			{
 				if ($first) {
 					$first = false;
 				} else {
-					$div->addContent(", &nbsp; ");
+					$div->addContent(" &nbsp; ");
 				}
-				$keyword1 = $keywordPair[0];
-				$keyword2 = $keywordPair[1];
+				$keyword1 = $row["kw1"];
+				$keyword2 = $row["kw2"];
+				$count = $row["cnt"] * 5;
 				$link = new Anchor($formatService->getQueryURL("$keyword1 $keyword2"),
-				                   "$keyword1&nbsp;-&nbsp;$keyword2");
+				                   "$keyword1-$keyword2");
+				$link->set("style", "font-size: 1.${count}em");
 				$div->addContent($link);
 			}
 			$output .= $div;
