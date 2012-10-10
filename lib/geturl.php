@@ -59,7 +59,7 @@ function geturl($url, $userAgent=null, $follow=true, $timeout=30) {
 	// Recurse if we are redirected
 	if ($follow && preg_match('/Location: (.*)\r\n/', $outData, $match)) {
 		$url = $match[1];
-		return geturl($url, $timeout);
+		return geturl($url, $userAgent, $follow, $timeout);
 	}
 
 	// Return the response

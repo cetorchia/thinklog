@@ -61,7 +61,7 @@ class AddService
 	function addThoughtsFromTwitter($twitterQuery)
 	{
 		$url = TWITTER_SEARCH_API . "?q=" . urlencode($twitterQuery);
-		$data = geturl($url, "Thinklog");
+		$data = geturl($url);
 		return $this->addThoughts($data);
 	}
 
