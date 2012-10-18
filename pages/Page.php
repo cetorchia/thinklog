@@ -4,6 +4,7 @@ require_once(DOC_ROOT . "/lib/html.php");
 require_once(DOC_ROOT . "/pages/HeaderSection.php");
 require_once(DOC_ROOT . "/pages/MessagesSection.php");
 require_once(DOC_ROOT . "/pages/MenuSection.php");
+require_once(DOC_ROOT . "/pages/SearchSection.php");
 require_once(DOC_ROOT . "/pages/ThinkerSection.php");
 
 abstract class Page
@@ -41,6 +42,7 @@ abstract class Page
 		$headerSection = new HeaderSection($this->serverRequest, $this->services, $this->login);
 		$messagesSection = new MessagesSection($this->serverRequest, $this->services, $this->login);
 		$menuSection = new MenuSection($this->serverRequest, $this->services, $this->login);
+		$searchSection = new SearchSection($this->serverRequest, $this->services, $this->login);
 
 		// Get the context for this page
 		$GET = $this->serverRequest->getGET();
@@ -95,6 +97,7 @@ abstract class Page
 			$thinkerSection = new ThinkerSection($this->serverRequest, $this->services, $this->login);
 			$sideBar->addContent($thinkerSection->draw());
 		}
+		$sideBar->addContent($searchSection->draw());
 
 		$body->addContent($sideBar);
 

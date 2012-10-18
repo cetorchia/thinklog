@@ -1,15 +1,13 @@
 <?php
 
 require_once(DOC_ROOT . "/lib/html.php");
-require_once(DOC_ROOT . "/pages/Page.php");
-require_once(DOC_ROOT . "/pages/Notice.php");
+require_once(DOC_ROOT . "/pages/Section.php");
 
-class SearchPage extends Page
+class SearchSection extends Section
 {
 	public function getContent()
 	{
-		$output = "<div class=\"section\">\n";
-		$output .= "<h2>Search</h2>\n";
+		$output = "";
 
 		$GET = $this->serverRequest->getGET();
 
@@ -18,7 +16,6 @@ class SearchPage extends Page
 		$login = $this->login;
 
 		// Some services we might need.
-		$thoughtService = $this->services->thoughtService;
 		$thinkerService = $this->services->thinkerService;
 		$formatService  = $this->services->formatService;
 
@@ -30,19 +27,17 @@ class SearchPage extends Page
 
 		// The search markup
 
-		$output .= new Notice(NOTICE_SEARCH);
-		$output .= "<form method=\"get\" action=\"" . $formatService->getThinklogURL() . "\">\n";
+		$output .= "<form method=\"get\" action=\"" . $formatService->getThinklogURL() . "\" " .
+		           "style=\"padding: 0; margin: 0px;\">\n";
 		$output .= "<input type=\"text\" value=\"\" name=\"q\" style=\"width: 50%; height: 2em;\" />\n";
 		$output .= "<input type=\"submit\" value=\"search\" style=\"height:2em\"/>\n";
-		$output .= "<br />\n";
 
 		if(isset($thinkerId))
 		{
+			$output .= "<br />\n";
 			$output .= "<input type=\"checkbox\" name=\"thinker\" value=\"" . htmlspecialchars($thinkerId) . "\" />";
-			$output .= htmlspecialchars($thinker->getName()) . "'s thots only";
+			$output .= htmlspecialchars($thinker->getName()) . "'s thoughts only";
 		}
-
-		$output .= "</div>\n";
 
 		return $output;
 	}

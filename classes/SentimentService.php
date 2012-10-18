@@ -40,7 +40,7 @@ class SentimentService
 
 			// Add these words to our collection of word sums
 			foreach ($words as $word) {
-				if (isset($sum[$word])) {
+				if (isset($wordSums[$word])) {
 					$wordSums[$word] += $sentiment;
 					$wordN[$word]++;
 				} else {

@@ -43,12 +43,6 @@ class MenuSection extends Section
 				"All thoughts"
 		))." <br />\n ");
 
-		// Link to home page
-		$linksDiv->addContent((new Anchor(
-				$formatService->getSearchPageURL(),
-				"Search"
-		))." <br />\n ");
-
 		// Specific to current thinker
 		if(isset($thinker))
 		{
