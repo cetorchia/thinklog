@@ -39,17 +39,8 @@ class TagCloudSection extends Section
 		$query = $this->query;
 
 		// Retrieve keywords and keyword pairs
-		if (!$query) {
-			$keywords = $tagCloudService->getKeywords($thinkerId, $thoughtId, $query);
-			$keywordPairs = $tagCloudService->getKeywordPairs($thinkerId, $thoughtId, $query);
-		} else {
-			$keywordPairs = $tagCloudService->getKeywordPairs($thinkerId, $thoughtId, $query);
-			$keywords = array();
-			foreach ($keywordPairs as $keywordPair) {
-				$keywords[] = array("keyword" => $keywordPair["kw2"],
-				                    "cnt" => $keywordPair["cnt"]);
-			}
-		}
+		$keywords = $tagCloudService->getKeywords($thinkerId, $thoughtId, $query);
+		$keywordPairs = $tagCloudService->getKeywordPairs($thinkerId, $thoughtId, $query);
 
 		// Look up sentiment
 		if ($keywords) {
