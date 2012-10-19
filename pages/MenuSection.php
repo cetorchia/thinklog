@@ -43,7 +43,6 @@ class MenuSection extends Section
 				"All thoughts"
 		))." <br />\n ");
 
-		// Specific to current thinker
 		if(isset($thinker))
 		{
 			$thinkerName = htmlspecialchars($thinker->getName());
@@ -55,7 +54,8 @@ class MenuSection extends Section
 			$thinkerName = htmlspecialchars($thinkerId);
 		}
 
-		if(isset($thinkerName)) {
+		// Specific to the given thinker
+		if(isset($thinkerName) && (!isset($login) || $thinkerId != $login->getThinkerId())) {
 			$linksDiv->addContent((new Anchor(
 					$formatService->getThinkerAllURL($thinkerId),
 					htmlspecialchars($thinkerName) . "'s thoughts")
@@ -70,6 +70,10 @@ class MenuSection extends Section
 		// Specific to logged-in thinker
 		if(isset($login))
 		{
+			$linksDiv->addContent((new Anchor(
+					$formatService->getThinkerAllURL($login->getThinkerId()),
+					"My Thoughts"
+			))." <br />\n ");
 			$linksDiv->addContent((new Anchor(
 					$formatService->getThinkerURL($login->getThinkerId()),
 					"My Thinklog"
