@@ -32,7 +32,7 @@ class SearchSection extends Section
 		$output .= "<input type=\"text\" value=\"\" name=\"q\" style=\"width: 50%; height: 2em;\" />\n";
 		$output .= "<input type=\"submit\" value=\"search\" style=\"height:2em\"/>\n";
 
-		if(isset($thinkerId))
+		if(isset($thinkerId) && isset($thinker))
 		{
 			$output .= "<br />\n";
 			$output .= "<input type=\"checkbox\" name=\"thinker\" value=\"" . htmlspecialchars($thinkerId) . "\" />";
