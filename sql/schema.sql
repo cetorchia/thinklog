@@ -37,9 +37,14 @@ create table if not exists sentiment (
 	value float
 );
 
+create or replace view thought_age
+as select thought_id, 1.0/round(1+(UNIX_TIMESTAMP(current_timestamp)-UNIX_TIMESTAMP(date))/86400/31) as weight
+  from thoughts;
+
 create or replace view keyword_count
-as select keyword_id, count(thought_id) as cnt
-   from mentions
+as select keyword_id, sum(weight) as cnt
+   from mentions m, thought_age t
+   where m.thought_id = t.thought_id
    group by keyword_id
 ;
 
@@ -50,11 +55,11 @@ as select keyword_id, cnt
 ;
 
 create or replace view keyword_pair_count
-as select m1.keyword_id as keyword1, m2.keyword_id as keyword2,
-          count(m1.thought_id) as cnt
-   from mentions m1, mentions m2
+as select m1.keyword_id as keyword1, m2.keyword_id as keyword2, sum(weight) as cnt
+   from mentions m1, mentions m2, thought_age t
    where m1.thought_id = m2.thought_id
      and m1.keyword_id <> m2.keyword_id
+     and t.thought_id = m1.thought_id
    group by m1.keyword_id, m2.keyword_id
 ;
 
