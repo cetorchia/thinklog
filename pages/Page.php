@@ -65,6 +65,10 @@ abstract class Page
 		$head->addContent(new Title(THINKLOG_TITLE));
 		$head->addContent(new Link("icon", "image/png", "images/icon.png"));
 		$head->addContent(new Link("StyleSheet", "text/css", "style.css"));
+		$head->addContent("<script type=\"text/javascript\" src=\"js/jquery-1.4.2.min.js\"></script>");
+		$head->addContent("<script type=\"text/javascript\" src=\"js/raphael-min.js\"></script>");
+		$head->addContent("<script type=\"text/javascript\" src=\"js/dracula_graffle.js\"></script>");
+		$head->addContent("<script type=\"text/javascript\" src=\"js/dracula_graph.js\"></script>");
 		$html->addContent($head);
 
 		//

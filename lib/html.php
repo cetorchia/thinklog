@@ -20,7 +20,7 @@
 		public function	getTag() { return($this->tag); }
 
 		public function	setContent($content) { $this->content=$content; }
-		public function	addContent($content) { $this->setContent($this->getContent().$content."\n"); }
+		public function	addContent($content) { $this->setContent($this->getContent().$content); }
 		public function	getContent() { return($this->content); }
 
 		public function	setAttributes($attributes) { $this->attributes=$attributes; }
@@ -89,8 +89,8 @@
 
 				// Add the content
 
-				if(isset($content)&&($content!='')) {
-					$output.="> $content";
+				if(isset($content)&&($content!='' || $tag=='div')) {
+					$output.=">$content";
 					$output.=$this->getNeedsClosure()?"</$tag>\n":"";
 				}
 

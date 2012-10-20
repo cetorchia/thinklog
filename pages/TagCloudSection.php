@@ -2,6 +2,7 @@
 
 require_once(DOC_ROOT . "/lib/html.php");
 require_once(DOC_ROOT . "/pages/Section.php");
+require_once(DOC_ROOT . "/lib/GraphDrawer.php");
 
 class TagCloudSection extends Section
 {
@@ -120,23 +121,19 @@ class TagCloudSection extends Section
 			$div->set("class", "bubble tag_cloud");
 			$div->set("style", "float: left");
 			$div->addContent("${title1}Keyword Relationships${title2}: <br />");
-			$first = true;
+			$div->addContent("<div id=\"keyword_relationships\"></div>");
+			$graph = new GraphDrawer("keyword_relationships", 250, 200);
 			foreach($keywordPairs as $row)
 			{
-				if ($first) {
-					$first = false;
-				} else {
-					$div->addContent(" &nbsp; ");
-				}
 				$keyword1 = $row["kw1"];
 				$keyword2 = $row["kw2"];
 				$count = $row["cnt"] * 5;
-				$link = new Anchor($formatService->getQueryURL("$keyword1 $keyword2"),
-				                   "$keyword1-$keyword2");
-				$link->set("style", "font-size: 1.${count}em");
-				$div->addContent($link);
+				$graph->addNode($keyword1, $formatService->getQueryURL($keyword1));
+				$graph->addNode($keyword2, $formatService->getQueryURL($keyword2));
+				$graph->addEdge($keyword1, $keyword2, $count);
 			}
 			$output .= $div;
+			$output .= $graph->draw();
 		}
 
 		if ($keywords || $keywordPairs) {

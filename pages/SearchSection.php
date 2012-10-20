@@ -29,7 +29,7 @@ class SearchSection extends Section
 
 		$output .= "<form method=\"get\" action=\"" . $formatService->getThinklogURL() . "\" " .
 		           "style=\"padding: 0; margin: 0px;\">\n";
-		$output .= "<input type=\"text\" value=\"\" name=\"q\" style=\"width: 50%; height: 2em;\" />\n";
+		$output .= "<input type=\"text\" value=\"\" name=\"q\" style=\"width: 70%; height: 2em;\" />\n";
 		$output .= "<input type=\"submit\" value=\"search\" style=\"height:2em\"/>\n";
 
 		if(isset($thinkerId) && isset($thinker))
