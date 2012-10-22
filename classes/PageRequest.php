@@ -26,7 +26,7 @@ class PageRequest
 
 	protected $login;
 
-	public function __construct($serverRequest, $services, $login)
+	public function __construct(&$serverRequest, &$services, &$login)
 	{
 		$GET = $serverRequest->getGET();
 		$this->thinkerId = isset($GET['thinker']) ? $GET['thinker'] : null;

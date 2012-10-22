@@ -6,7 +6,7 @@ class LoginService
 {
 	protected $thinkerService;
 
-	public function __construct($services)
+	public function __construct(&$services)
 	{
 		$this->thinkerService = $services->thinkerService;
 	}
@@ -16,7 +16,7 @@ class LoginService
 	// If the user is logged in these will make sense. Otherwise, they are null.
 	//
 
-	public function getLogin($serverRequest)
+	public function getLogin(&$serverRequest)
 	{
 		$COOKIE = $serverRequest->getCOOKIE();
 

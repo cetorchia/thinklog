@@ -17,7 +17,7 @@ class RSSRequest
 
 	protected $login;
 
-	public function __construct($serverRequest, $services, $login)
+	public function __construct(&$serverRequest, &$services, &$login)
 	{
 		$GET = $serverRequest->getGET();
 

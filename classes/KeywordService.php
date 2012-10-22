@@ -7,7 +7,7 @@ class KeywordService
 {
 	protected $keywords = array();
 
-	function __construct($services)
+	function __construct(&$services)
 	{
 		// Get context
 	}

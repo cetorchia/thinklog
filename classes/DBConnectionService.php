@@ -2,7 +2,7 @@
 
 class DBConnectionService
 {
-	public function __construct($services)
+	public function __construct(&$services)
 	{
 	}
 

@@ -33,7 +33,7 @@ class AddRequest
 
 	// Get the request information
 
-	public function __construct($serverRequest, $services, $login)
+	public function __construct(&$serverRequest, &$services, &$login)
 	{
 		$POST = $serverRequest->getPOST();
 

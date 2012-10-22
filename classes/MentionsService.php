@@ -10,7 +10,7 @@ class MentionsService
 	protected $queryService;
 	protected $thoughtService;
 
-	function __construct($services)
+	function __construct(&$services)
 	{
 		// Get context
 		$this->keywordService = $services->keywordService;

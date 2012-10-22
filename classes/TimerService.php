@@ -4,7 +4,7 @@ class TimerService
 {
 	protected $timers;
 
-	public function __construct($services)
+	public function __construct(&$services)
 	{
 		$this->timers = array();
 		$this->start('total');

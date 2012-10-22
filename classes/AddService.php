@@ -20,7 +20,7 @@ class AddService
 	protected $mentionsService;
 	protected $login;
 
-	public function __construct($services)
+	public function __construct(&$services)
 	{
 		// Access to services
 		$this->thoughtService = $services->thoughtService;

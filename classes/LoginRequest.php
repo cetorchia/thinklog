@@ -15,7 +15,7 @@ class LoginRequest
 	protected $thinkerId;
 	protected $password;
 
-	public function __construct($serverRequest, $services)
+	public function __construct(&$serverRequest, &$services)
 	{
 		// Read POST request
 		$POST = $serverRequest->getPOST();

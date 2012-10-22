@@ -10,7 +10,7 @@ class ThoughtService
 	protected $table = "thoughts";
 	protected $columns = "thought_id, thinker_id, content AS body, private, UNIX_TIMESTAMP(date) AS date";
 
-	public function __construct($services)
+	public function __construct(&$services)
 	{
 	}
 

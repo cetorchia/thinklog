@@ -12,7 +12,7 @@ class ServerRequest
 	protected $COOKIE;
 	protected $FILES;
 
-	public function __construct($GET, $POST, $COOKIE, $FILES)
+	public function __construct(&$GET, &$POST, &$COOKIE, &$FILES)
 	{
 		$this->POST = $this->stripSlashesParamArray($POST);
 		$this->GET = $this->stripSlashesParamArray($GET);

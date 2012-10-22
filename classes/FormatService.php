@@ -9,7 +9,7 @@ class FormatService
 {
 	protected $nExcerptWords = 10;
 
-	public function __constructor($services)
+	public function __constructor(&$services)
 	{
 	}
 

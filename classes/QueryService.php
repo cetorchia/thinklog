@@ -20,7 +20,7 @@ class QueryService
 	// We'll need a few services to get data from the database
 	//
 
-	public function __construct($services)
+	public function __construct(&$services)
 	{
 		$this->thoughtService = $services->thoughtService;
 		$this->keywordService = $services->keywordService;

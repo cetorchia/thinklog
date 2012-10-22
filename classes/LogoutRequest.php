@@ -4,7 +4,7 @@ class LogoutRequest
 {
 	protected $logout;
 
-	public function __construct($serverRequest)
+	public function __construct(&$serverRequest)
 	{
 		$GET = $serverRequest->getGET();
 		$this->logout = isset($GET["logout"]);

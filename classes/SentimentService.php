@@ -11,7 +11,7 @@ class SentimentService
 	protected $sentiments;
 
 	// Construct this service
-	function __construct($service)
+	function __construct(&$service)
 	{
 	}
 

@@ -9,7 +9,7 @@ class TagCloudService
 {
 	protected $keywordService;
 
-	function __construct($services)
+	function __construct(&$services)
 	{
 		$this->keywordService = $services->keywordService;
 	}

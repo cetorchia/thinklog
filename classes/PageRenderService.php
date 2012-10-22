@@ -7,7 +7,7 @@ class PageRenderService
 
 	protected $formatService;
 
-	public function __construct($services)
+	public function __construct(&$services)
 	{
 		$this->formatService = $services->formatService;
 	}

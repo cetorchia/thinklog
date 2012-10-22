@@ -8,7 +8,7 @@ class ThinkerService
 	protected $table = "thinkers";		// Table name
 	protected $thinkers = array();		// Thinker data cache
 
-	public function __construct($services)
+	public function __construct(&$services)
 	{
 	}
 

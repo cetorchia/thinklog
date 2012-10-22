@@ -12,7 +12,7 @@ class DocumentRequest
 
 	protected $login;
 
-	public function __construct($serverRequest, $services, $login)
+	public function __construct(&$serverRequest, &$services, &$login)
 	{
 		$GET = $serverRequest->getGET();
 		$this->output = isset($GET["output"]) ? $GET["output"] : "html";
