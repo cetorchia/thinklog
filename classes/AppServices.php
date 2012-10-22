@@ -10,6 +10,7 @@ require_once(DOC_ROOT . "/classes/MentionsService.php");
 require_once(DOC_ROOT . "/classes/QueryService.php");
 require_once(DOC_ROOT . "/classes/SentimentService.php");
 require_once(DOC_ROOT . "/classes/TagCloudService.php");
+require_once(DOC_ROOT . "/classes/KeywordHistoryService.php");
 require_once(DOC_ROOT . "/classes/LoginService.php");
 require_once(DOC_ROOT . "/classes/PageRenderService.php");
 
@@ -32,6 +33,7 @@ class AppServices
 		$this->addService = new AddService($this);
 		$this->sentimentService = new SentimentService($this);
 		$this->tagCloudService = new TagCloudService($this);
+		$this->keywordHistoryService = new KeywordHistoryService($this);
 		$this->loginService = new LoginService($this);
 		$this->pageRenderService = new PageRenderService($this);
 	}

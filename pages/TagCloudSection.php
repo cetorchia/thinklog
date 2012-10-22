@@ -3,6 +3,7 @@
 require_once(DOC_ROOT . "/lib/html.php");
 require_once(DOC_ROOT . "/pages/Section.php");
 require_once(DOC_ROOT . "/lib/GraphDrawer.php");
+require_once(DOC_ROOT . "/lib/StreamDrawer.php");
 
 class TagCloudSection extends Section
 {
@@ -29,6 +30,7 @@ class TagCloudSection extends Section
 		$formatService = $this->services->formatService;
 		$sentimentService = $this->services->sentimentService;
 		$tagCloudService = $this->services->tagCloudService;
+		$keywordHistoryService = $this->services->keywordHistoryService;
 		$thinkerService = $this->services->thinkerService;
 		$GET = $this->serverRequest->getGET();
 
@@ -49,6 +51,11 @@ class TagCloudSection extends Section
 			foreach ($keywords as $i => $row) {
 				$keywords[$i]["sentiment"] = $sentimentService->getSentiment($row["keyword"]);
 			}
+		}
+
+		// Retrieve keyword history
+		if (!$thoughtId) {
+			$keywordHistory = $keywordHistoryService->getKeywordHistory($thinkerId, $query);
 		}
 
 		/*
@@ -115,6 +122,18 @@ class TagCloudSection extends Section
 			$output .= $div;
 		}
 
+		// Render keyword history
+		if ($keywordHistory) {
+			$div = new Div();
+			$div->set("class", "bubble tag_cloud");
+			$div->set("style", "float: left");
+			$div->addContent("${title1}Keyword History${title2} (last 30 days): <br />");
+			$div->addContent("<div id=\"keyword_history\"></div>");
+			$stream = new StreamDrawer("keyword_history", 250, 200, 30, $keywordHistory);
+			$output .= $div;
+			$output .= $stream->draw();
+		}
+
 		// Render keyword pairs ("relationships")
 		if ($keywordPairs) {
 			$div = new Div();
@@ -136,7 +155,7 @@ class TagCloudSection extends Section
 			$output .= $graph->draw();
 		}
 
-		if ($keywords || $keywordPairs) {
+		if ($keywords || $keywordPairs || $keywordHistory) {
 			$clearBoth = new Div("&nbsp;");
 			$clearBoth->set("style", "clear: both; font-size: 0");
 			$output .= $clearBoth;
