@@ -12,3 +12,10 @@ DATABASE
 - SentiWordNet_3.0.0_20120510.txt in etc/
   (Get at http://sentiwordnet.isti.cnr.it/)
 - Run sentiment.php (populates word sentiment table with SentiWordNet)
+
+DEVELOPER BEST PRACTICES
+========================
+
+In order to maintain mockability, please instantiate any new classes you create
+once in classes/AppServices.php and classes/Services.php. Any new JavaScript libraries
+you create please put in js/IncludeScriptsHere.php.

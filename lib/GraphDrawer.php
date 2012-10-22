@@ -1,8 +1,7 @@
 <?php
 
 /**
- * Simple library for drawing a graph using dracula_graph.
- * Precondition: dracula, raphael, and jquery scripts included already.
+ * Simple library for drawing a graph using force.js
  */
 
 class GraphDrawer {
@@ -16,40 +15,42 @@ class GraphDrawer {
 		$this->id = $id;
 		$this->width = $width;
 		$this->height = $height;
-		$this->nodes = "";
-		$this->edges = "";
+		$this->nodes = array();
+		$this->edges = array();
 	}
 
-	// Adds a node with given id, font-size, and URL
-	function addNode($id, $url=null, $size=null) {
-		$content = "";
+	// Adds a node with given name, font-size, and URL
+	// If it already exists, it is updated, not replaced.
+	function addNode($name, $url=null, $size=null) {
+		if (!$this->nodes[$name]) {
+			$this->nodes[$name] = array();
+		}
+		$node = &$this->nodes[$name];
 		if ($size) {
-			$content .= "size: $size, ";
+			$node["size"] = $size;
 		}
 		if ($url) {
-			$content .= "url: \"$url\", ";
+			$node["url"] = $url;
 		}
-		$this->nodes .= 'g.addNode("'.$id.'", {'.$content.'});'."\n";
 	}
 
-	// Adds an edge between $id1 and $id2 ($weight optional)
-	function addEdge($id1, $id2, $weight=null) {
+	// Adds an edge between nodes $name1 and $name2 ($weight optional)
+	function addEdge($name1, $name2, $weight=null) {
+		if (!$this->edges[$name1]) {
+			$this->edges[$name1] = array();
+		}
 		if ($weight == null) {
 			$weight = 1;
 		}
-		$this->edges .= 'g.addEdge("'.$id1.'", "'.$id2.'", {stroke:"#000", fill:"#000|'.$weight.'"});'."\n";
+		$this->edges[$name1][$name2] = $weight;
 	}
 
 	// Renders the javascript to display the graph on the canvas
 	function draw() {
+		$nodes = json_encode($this->nodes);
+		$edges = json_encode($this->edges);
 		$output = "<script type=\"text/javascript\">\n";
-		$output .= "var g = new Graph();\n";
-		$output .= $this->nodes;
-		$output .= $this->edges;
-		$output .= "var layouter = new Graph.Layout.Spring(g);\n";
-		$output .= "var renderer = new Graph.Renderer.Raphael('{$this->id}', g, {$this->width}, {$this->height});\n";
-		$output .= "layouter.layout();\n";
-		$output .= "renderer.draw();\n";
+		$output .= "drawGraph(\"$this->id\", $this->width, $this->height, $nodes, $edges);\n";
 		$output .= "</script>\n";
 		return $output;
 	}

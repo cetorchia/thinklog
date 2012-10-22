@@ -4,6 +4,4 @@ Thinklog is licensed under the GNU GPL v2.
 It can be distributed freely under certain conditions; see fsf.org.
 There is no warranty, use at your own risk.
 
-However, jQuery, dracula_graph.js, dracula_graffle.js, and Raphael are distributed
-under the MIT license. They are in the "js/" directory.
-See the MIT license for redistribution terms.
+D3 is (c) Michael Bostock. See d3js.org.
