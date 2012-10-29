@@ -12,9 +12,9 @@ class QueryService
 	protected $thoughtService;
 	protected $keywordService;
 
-	protected $thoughtColumns0 = "thought_id, date, thinker_id, body, private";
-	protected $thoughtColumns1 = "thought_id, UNIX_TIMESTAMP(date) AS date, thinker_id, content AS body, private";
-	protected $thoughtColumns2 = "t2.thought_id, UNIX_TIMESTAMP(t2.date) AS date, t2.thinker_id, t2.content AS body, t2.private";
+	protected $thoughtColumns0 = "thought_id, date, thinker_id, twitter_id, body, private";
+	protected $thoughtColumns1 = "thought_id, UNIX_TIMESTAMP(date) AS date, thinker_id, twitter_id, content AS body, private";
+	protected $thoughtColumns2 = "t2.thought_id, UNIX_TIMESTAMP(t2.date) AS date, t2.thinker_id, t2.twitter_id, t2.content AS body, t2.private";
 
 	//
 	// We'll need a few services to get data from the database

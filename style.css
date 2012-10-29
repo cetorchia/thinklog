@@ -137,6 +137,7 @@ div.notice {
 div.bubble {
 	padding: 10px;
 	margin: 5px;
+	overflow: hidden;
 	color: #000;
 	background: #f4f4d8;
 	border: 1px solid #bbb;

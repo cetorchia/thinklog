@@ -52,13 +52,22 @@ class PageRenderService
 		}
 
 		// thought text
-		$div = new Div($this->formatService->formatText($thought->getBody()));
+		if ($thought->getTwitterId()) {
+			$body = "http://twitter.com/".$thought->getThinkerId()."/status/".$thought->getTwitterId();
+		} else {
+			$body = $thought->getBody();
+		}
+		$div = new Div($this->formatService->formatText($body));
 		$div->set("class", "bubble thought_body");
 		$output .= $div;
 
 		// By whom and when
+		$thinkerId = $thought->getThinkerId();
+		if ($thought->getTwitterId()) {
+			$thinkerId = "$thinkerId@twitter.com";
+		}
 		$a = new Anchor($this->formatService->getThinkerURL($thought->getThinkerId()),
-			htmlspecialchars($thought->getThinkerId()));
+			htmlspecialchars($thinkerId));
 		$par = new Paragraph("By $a ");
 		$thoughtDate = date("D, M j, Y", $thought->getDate());
 		$thoughtTime = date("g:i:s T", $thought->getDate());
@@ -79,9 +88,14 @@ class PageRenderService
 		$div=new Div();
 		$div->set("class", "bubble result");
 
+		$thinkerId = $thought->getThinkerId();
+		if ($thought->getTwitterId()) {
+			$thinkerId = "$thinkerId@twitter.com";
+		}
+
 		$div->addContent($this->getThoughtLink($thought));
 		$div->addContent(new LineBreak());
-		$div->addContent("By ".htmlspecialchars($thought->getThinkerId()));
+		$div->addContent("By ".htmlspecialchars($thinkerId));
 		$div->addContent("&nbsp;(".date("M d, Y",$thought->getDate()).")");
 
 		if($thought->getPrivate()) {

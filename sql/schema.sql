@@ -15,9 +15,11 @@ create table if not exists thoughts (
 	thought_id integer primary key auto_increment,
 	content varchar(512),
 	thinker_id varchar(64),
+	twitter_id varchar(64),
 	date timestamp default current_timestamp,
 	private tinyint,
-	UNIQUE(thinker_id, content)
+	UNIQUE(thinker_id, content),
+	UNIQUE(twitter_id)
 );
 
 create table if not exists keywords (

@@ -4,6 +4,7 @@ class Thought
 {
 	protected $id;
 	protected $thinkerId;
+	protected $twitterId;
 	protected $date;
 	protected $body;
 	protected $private;
@@ -13,6 +14,9 @@ class Thought
 
 	public function getThinkerId() { return $this->thinkerId; }
 	public function setThinkerId($thinkerId) { $this->thinkerId = $thinkerId; }
+
+	public function getTwitterId() { return $this->twitterId; }
+	public function setTwitterId($twitterId) { $this->twitterId= $twitterId; }
 
 	public function getDate() { return $this->date; }
 	public function setDate($date) { $this->date = $date; }

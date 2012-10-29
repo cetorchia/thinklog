@@ -8,7 +8,7 @@ class ThoughtService
 	// Thought cache
 	protected $thoughts = array();
 	protected $table = "thoughts";
-	protected $columns = "thought_id, thinker_id, content AS body, private, UNIX_TIMESTAMP(date) AS date";
+	protected $columns = "thought_id, thinker_id, twitter_id, content AS body, private, UNIX_TIMESTAMP(date) AS date";
 
 	public function __construct(&$services)
 	{
@@ -94,12 +94,21 @@ class ThoughtService
 
 	public function add(&$thought)
 	{
+		$columns = "thinker_id, content, private";
+		if ($thought->getTwitterId()) {
+			$columns .= ", twitter_id";
+		}
+
 		// Add the thought to the database
-		$query = "INSERT INTO $this->table (thinker_id, content, private) " .
+		$query = "INSERT INTO $this->table ($columns) " .
 		         "VALUES ( " .
 		         "'" . mysql_real_escape_string($thought->getThinkerId()) . "', " .
 		         "'" . mysql_real_escape_string($thought->getBody()) . "', " .
-		         mysql_real_escape_string($thought->getPrivate() ? "1" : "0") . ")";
+		         mysql_real_escape_string($thought->getPrivate() ? "1" : "0");
+		if ($thought->getTwitterId()) {
+			$query .= ", '".$thought->getTwitterId()."'";
+		}
+		$query .= ")";
 		$result = mysql_query($query); 
 		if($result) {
 			$thought->setId(mysql_insert_id());	// Get the ID!
@@ -135,6 +144,7 @@ class ThoughtService
 		$thought = new Thought();
 		$thought->setId($row['thought_id']);
 		$thought->setThinkerId($row['thinker_id']);
+		$thought->setTwitterId($row['twitter_id']);
 		$thought->setBody($row['body']);
 		$thought->setPrivate($row['private'] ? true : false);
 		$thought->setDate($row['date']);

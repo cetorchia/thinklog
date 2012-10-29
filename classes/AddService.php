@@ -104,7 +104,8 @@ class AddService
 			$thinkerId = isset($item["from_user"]) ? $item["from_user"] : null;
 			$body = isset($item["text"]) ? $item["text"] : null;
 			$private = false;
-			$itWorked = $itWorked && $this->addThought($body, $private, $thinkerId);
+			$twitterId = isset($item["id_str"]) ? $item["id_str"] : null;
+			$itWorked = $itWorked && $this->addThought($body, $private, $thinkerId, $twitterId);
 		}
 
 		return $itWorked;
@@ -153,14 +154,14 @@ class AddService
 	//
 	// ** Aborts if any error arises
 
-	function addThought($body, $private, $thinkerId=null)
+	function addThought($body, $private, $thinkerId=null, $twitterId=null)
 	{
 		// Try to add the thought
 		if($body)
 		{
 			// Add a thot with the body (and current date) to the thinklog.
 
-			if(strlen($body) > MAX_BODY_LENGTH)
+			if(strlen($body) > MAX_BODY_LENGTH && !$twitterId)
 			{
 				$this->tooLong = true;
 				return false;
@@ -176,6 +177,9 @@ class AddService
 				$thought->setThinkerId($thinkerId ? $thinkerId :
 				                                    $this->login->getThinkerId());
 				$thought->setBody($body);
+				if ($twitterId) {
+					$thought->setTwitterId($twitterId);
+				}
 				$thought->setPrivate(isset($private)?$private:false);
 
 				if($this->thoughtService->add($thought))
