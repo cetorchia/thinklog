@@ -151,6 +151,11 @@ div.tag_cloud {
 	width: 90%;
 }
 
+div.chart {
+	border-bottom: 1px solid #222;
+	border-left: 1px solid #222;
+}
+
 /* Thought page */
 
 div.thought_body {

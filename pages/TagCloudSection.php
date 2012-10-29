@@ -128,7 +128,7 @@ class TagCloudSection extends Section
 			$div->set("class", "bubble tag_cloud");
 			$div->set("style", "float: left");
 			$div->addContent("${title1}Keyword History${title2} (last 30 days): <br />");
-			$div->addContent("<div id=\"keyword_history\"></div>");
+			$div->addContent("<div id=\"keyword_history\" class=\"chart\"></div>");
 			$stream = new StreamDrawer("keyword_history", 250, 200, 30, $keywordHistory);
 			$output .= $div;
 			$output .= $stream->draw();
