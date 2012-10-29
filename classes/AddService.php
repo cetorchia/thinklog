@@ -105,7 +105,8 @@ class AddService
 			$body = isset($item["text"]) ? $item["text"] : null;
 			$private = false;
 			$twitterId = isset($item["id_str"]) ? $item["id_str"] : null;
-			$itWorked = $itWorked && $this->addThought($body, $private, $thinkerId, $twitterId);
+			$date = isset($item["created_at"]) ? strtotime($item["created_at"]) : null;
+			$itWorked = $itWorked && $this->addThought($body, $private, $thinkerId, $twitterId, $date);
 		}
 
 		return $itWorked;
@@ -126,6 +127,7 @@ class AddService
 			$body = null;
 			$private = false;
 			$thinkerId = null;
+			$date = null;
 			foreach($thoughtElement->childNodes as $child)
 			{
 				if(($child->nodeName == "body") ||
@@ -142,9 +144,13 @@ class AddService
 				{
 					$thinkerId = htmlspecialchars_decode(strip_tags($child->textContent));
 				}
+				else if(($child->nodeName == "date") || ($child->nodeName == "pubDate"))
+				{
+					$date = strtotime($child->textContent);
+				}
 			}
 
-			$itWorked = $itWorked && $this->addThought($body, $private, $thinkerId);
+			$itWorked = $itWorked && $this->addThought($body, $private, $thinkerId, null, $date);
 		}
 
 		return $itWorked;
@@ -154,7 +160,7 @@ class AddService
 	//
 	// ** Aborts if any error arises
 
-	function addThought($body, $private, $thinkerId=null, $twitterId=null)
+	function addThought($body, $private, $thinkerId=null, $twitterId=null, $date=null)
 	{
 		// Try to add the thought
 		if($body)
@@ -181,6 +187,9 @@ class AddService
 					$thought->setTwitterId($twitterId);
 				}
 				$thought->setPrivate(isset($private)?$private:false);
+				if (isset($date)) {
+					$thought->setDate($date);
+				}
 
 				if($this->thoughtService->add($thought))
 				{

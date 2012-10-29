@@ -95,8 +95,13 @@ class ThoughtService
 	public function add(&$thought)
 	{
 		$columns = "thinker_id, content, private";
-		if ($thought->getTwitterId()) {
+		$twitterId = $thought->getTwitterId();
+		if ($twitterId) {
 			$columns .= ", twitter_id";
+		}
+		$date = $thought->getDate();
+		if (isset($date)) {
+			$columns .= ", date";
 		}
 
 		// Add the thought to the database
@@ -105,11 +110,14 @@ class ThoughtService
 		         "'" . mysql_real_escape_string($thought->getThinkerId()) . "', " .
 		         "'" . mysql_real_escape_string($thought->getBody()) . "', " .
 		         mysql_real_escape_string($thought->getPrivate() ? "1" : "0");
-		if ($thought->getTwitterId()) {
-			$query .= ", '".$thought->getTwitterId()."'";
+		if ($twitterId) {
+			$query .= ", '$twitterId'";
+		}
+		if (isset($date)) {
+			$query .= ", FROM_UNIXTIME($date)";
 		}
 		$query .= ")";
-		$result = mysql_query($query); 
+		$result = mysql_query($query);
 		if($result) {
 			$thought->setId(mysql_insert_id());	// Get the ID!
 		} else {
