@@ -95,7 +95,7 @@ class TagCloudSection extends Section
 			} else {
 				$span->addContent("Neutral");
 			}
-			$span->addContent(" ($sentiment)");
+			$span->addContent(" (" . round($sentiment, 3) . ")");
 			$div->addContent($span);
 			$output .= $div;
 
