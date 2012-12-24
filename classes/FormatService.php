@@ -144,11 +144,17 @@ class FormatService
 
 		// Link hash tags to queries
 
-		$string = preg_replace(HASH_TAG_REGEX,
-		                       " <a href=\"" . $this->getQueryURL("") . "$1\">#$1</a>",
-		                       $string);
+		$string = preg_replace_callback(HASH_TAG_REGEX, array($this, 'generateKeywordLink'),
+		                                $string);
 
 		return($string);
+	}
+
+	// Generates a keyword link from a hash tag preg match
+	function generateKeywordLink($match) {
+		$keyword = $match[1];
+		$keywordText = str_replace('_', ' ', $keyword);
+		return " <a href=\"" . $this->getQueryURL($keyword) . "\">$keywordText</a>";
 	}
 
 	// Returns the genitive of the name
