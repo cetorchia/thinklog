@@ -56,7 +56,7 @@ class MessagesSection
 				$par = new Paragraph();
 				$span = new Span();
 				$span->set("class", "thot_error");
-				$span->setContent("I could not add your thoughts: you did not specify any thoughts!");
+				$span->setContent("I could not add your thoughts: there are no thought(s) to add!");
 				$par->setContent($span);
 
 				$output = "" . $par;

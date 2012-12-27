@@ -26,7 +26,8 @@ class AddService
 		$this->thoughtService = $services->thoughtService;
 		$this->mentionsService = $services->mentionsService;
 
-		$this->error = $this->tooLong = $this->noThoughts = $this->invalidURL = false;
+		$this->noThoughts = true;	// None yet
+		$this->error = $this->tooLong = $this->invalidURL = false;
 	}
 
 	// Set the login data so we know the thinker's ID
@@ -69,7 +70,6 @@ class AddService
 	function addThoughts($data) {
 		// Extract thoughts from response
 		if (!$data) {
-			$this->noThoughts = true;
 			return false;
 		} else if (substr(trim($data),0,1) == '{') {
 			// It's JSON
@@ -90,7 +90,6 @@ class AddService
 		$response = json_decode($data, true);
 
 		if (isset($response["error"]) && $response["error"] == "You must enter a query.") {
-			$this->noThoughts = true;
 			return false;
 		} else if (isset($response["error"]) || isset($response["errors"])) {
 			$this->error = true;
@@ -163,8 +162,10 @@ class AddService
 	function addThought($body, $private, $thinkerId=null, $twitterId=null, $date=null)
 	{
 		// Try to add the thought
-		if($body)
+		if(trim($body))
 		{
+			$this->noThoughts = false;	// They specified something
+
 			// Add a thot with the body (and current date) to the thinklog.
 
 			if(strlen($body) > MAX_BODY_LENGTH && !$twitterId)
@@ -195,14 +196,13 @@ class AddService
 				{
 					$this->mentionsService->mentions($thought);	// Tag keywords
 					return true;
+				} else {
+					$this->error = true;
+					return false;
 				}
 			}
 		} else {
-			$this->noThoughts = true;
 			return false;
 		}
-
-		$this->error = true;
-		return false;
 	}
 }

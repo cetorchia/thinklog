@@ -4,6 +4,20 @@ require_once(DOC_ROOT . "/pages/Notice.php");
 
 class AddPage extends Page
 {
+	// Fields set in GET request if add failed
+	protected $body;
+	protected $private;
+
+	public function __construct(&$serverRequest, &$services, &$login)
+	{
+		parent::__construct($serverRequest, $services, $login);
+		$GET = $serverRequest->getGET();
+		$this->private = (isset($GET["private"]) && $GET["private"] == "1") ? "checked" : "";
+		$this->body = isset($GET["body"]) ? $GET["body"] : "";
+		$this->url = isset($GET["url"]) ? $GET["url"] : "";
+		$this->twitterQuery = isset($GET["twitterQuery"]) ? $GET["twitterQuery"] : "";
+	}
+
 	public function getContent()
 	{
 		// For adding one thought
@@ -14,10 +28,10 @@ class AddPage extends Page
 		$s .= new Notice(NOTICE_ADD_THOUGHTS);
 		$s .= "<form method=\"POST\" action=\"./\">\n";
 		$s .= "<input type=\"hidden\" name=\"add\" value=\"1\" />\n";
-		$s .= "<textarea rows=\"5\" cols=\"60\" name=\"body\"></textarea>\n";
+		$s .= "<textarea rows=\"5\" cols=\"60\" name=\"body\">{$this->body}</textarea>\n";
 		$s .= "<br />\n";
 		$s .= "<input type=\"submit\" value=\"add\" />\n";
-		$s .= "<input name=\"private\" type=\"checkbox\" value=\"1\"/>Private\n";
+		$s .= "<input name=\"private\" type=\"checkbox\" value=\"1\" {$this->private}/>Private\n";
 		$s .= "</form>\n";
 		$addDiv->addContent($s);
 
@@ -29,7 +43,7 @@ class AddPage extends Page
 		$s .= "<p>Add your thoughts from a Twitter search</p>\n";
 		$s .= "<form method=\"POST\" action=\"./\">\n";
 		$s .= "<input type=\"hidden\" name=\"fromTwitter\" value=\"1\" />\n";
-		$s .= "<input name=\"twitterQuery\" type=\"text\" />\n";
+		$s .= "<input name=\"twitterQuery\" type=\"text\" value=\"{$this->twitterQuery}\" />\n";
 		$s .= "<input type=\"submit\" value=\"search & add\" />\n";
 		$s .= "</form>\n";
 		$fromTwitterDiv->addContent($s);
@@ -42,7 +56,7 @@ class AddPage extends Page
 		$s .= "<p>Add your thoughts in XML or RSS format from a URL.</p>\n";
 		$s .= "<form method=\"POST\" action=\"./\">\n";
 		$s .= "<input type=\"hidden\" name=\"fromURL\" value=\"1\" />\n";
-		$s .= "<input name=\"url\" type=\"text\" />\n";
+		$s .= "<input name=\"url\" type=\"text\" value=\"{$this->url}\"/>\n";
 		$s .= "<input type=\"submit\" value=\"add\" />\n";
 		$s .= "</form>\n";
 		$fromURLDiv->addContent($s);

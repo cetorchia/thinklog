@@ -76,6 +76,8 @@ class AddRequest
 
 	function execute()
 	{
+		$params = "think";	// Parameters of page to redirect to
+		$success = true;	// So far so good
 		if($this->isRequested)
 		{
 			// Only post if we can verify the login thinker id and password!!
@@ -87,6 +89,10 @@ class AddRequest
 				if($this->add)
 				{
 					$this->addService->addThought($this->body, $this->private);
+					$params .= "&body=". urlencode(substr($this->body, 0, 512));
+					if ($this->private) {
+						$params .= "&private=1";
+					}
 				}
 
 				// Upload thoughts from file
@@ -99,41 +105,51 @@ class AddRequest
 				else if($this->fromURL)
 				{
 					$this->addService->addThoughtsFromURL($this->url);
+					$params .= "&url=" . urlencode($this->url);
 				}
 
 				// Retrieve thoughts from URL
 				else if($this->fromTwitter)
 				{
 					$this->addService->addThoughtsFromTwitter($this->twitterQuery);
+					$params .= "&twitterQuery=" . urlencode($this->twitterQuery);
 				}
 
 				//
 				// Check for errors
 				//
-
 				if ($this->addService->tooLong) {
-					header('Location: ./?think&tooLong');
-					exit;
-				} else if ($this->addService->error) {
-					header('Location: ./?think&error');
-					exit;
-				} else if ($this->addService->noThoughts) {
-					header('Location: ./?think&noThoughts');
-					exit;
-				} else if ($this->addService->invalidURL) {
-					header('Location: ./?think&invalidURL');
-					exit;
+					$params .= "&tooLong";
+					$success = false;
+				}
+				if ($this->addService->error) {
+					$params .= "&error";
+					$success = false;
+				}
+				if ($this->addService->noThoughts) {
+					$params .= "&noThoughts";
+					$success = false;
+				}
+				if ($this->addService->invalidURL) {
+					$params .= "&invalidURL";
+					$success = false;
 				}
 			}
 
 			else
 			{
-				header('Location: ./?think&notLogin');
-				exit;
+				$params .= "&notLogin";
+				$success = false;
 			}
 
-			// It must have been successful if we are here.
-			header('Location: ./?think&success');
+			if ($success) {
+				$params = "think&success";
+			} else {
+				// Give them another chance
+				$params = "add&" . $params;
+			}
+
+			header("Location: ./?$params");
 			exit;
 		}
 	}
