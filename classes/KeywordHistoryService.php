@@ -41,7 +41,7 @@ class KeywordHistoryService
 
 	// Returns the MySQL query result for given thinker, query, and day
 	protected function _queryDay($thinkerSQL, $wordlist, $day) {
-		$daySQL = "-FLOOR(UNIX_TIMESTAMP(current_timestamp)/86400)+FLOOR(UNIX_TIMESTAMP(date)/86400)+30";
+		$daySQL = "-FLOOR(UNIX_TIMESTAMP(current_timestamp)/86400)+FLOOR(UNIX_TIMESTAMP(date)/86400)+29";
 
 		// Query for keywords related to this thinker and query and count how many for each day
 		if($wordlist) {
