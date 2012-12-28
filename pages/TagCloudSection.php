@@ -11,12 +11,24 @@ class TagCloudSection extends Section
 	protected $thoughtId;
 	protected $query;
 
+	protected $formatService;
+	protected $thinkerService;
+	protected $tagCloudService;
+	protected $sentimentService;
+	protected $keywordHistoryService;
+
 	public function __construct(&$serverRequest, &$services, &$login, $thinkerId=null, $thoughtId=null, $query=null)
 	{
 		parent::__construct($serverRequest, $services, $login);
 		$this->thinkerId = $thinkerId;
 		$this->thoughtId = $thoughtId;
 		$this->query= $query;
+
+		$this->formatService = $this->services->formatService;
+		$this->thinkerService = $this->services->thinkerService;
+		$this->tagCloudService = $this->services->tagCloudService;
+		$this->sentimentService = $this->services->sentimentService;
+		$this->keywordHistoryService = $this->services->keywordHistoryService;
 	}
 
 	public function getContent()
@@ -24,37 +36,62 @@ class TagCloudSection extends Section
 		$output = "";
 
 		// Some services and context we might need.
-		$formatService = $this->services->formatService;
-		$sentimentService = $this->services->sentimentService;
-		$tagCloudService = $this->services->tagCloudService;
-		$keywordHistoryService = $this->services->keywordHistoryService;
-		$thinkerService = $this->services->thinkerService;
 		$GET = $this->serverRequest->getGET();
 
 		// Get the requested thinker or thought, if any
 		$thinkerId = $this->thinkerId;
-		$thinker = isset($thinkerId) ? $thinkerService->getThinker($thinkerId) : null;
+		$thinker = isset($thinkerId) ? $this->thinkerService->getThinker($thinkerId) : null;
 		$thinkerName = isset($thinker) ? $thinker->getName() : $thinkerId;
 		$thoughtId = $this->thoughtId;
 		$query = $this->query;
 
 		// Retrieve keywords and keyword pairs
-		$keywords = $tagCloudService->getKeywords($thinkerId, $thoughtId, $query);
-		$keywordPairs = $tagCloudService->getKeywordPairs($thinkerId, $thoughtId, $query);
+		$keywords = $this->tagCloudService->getKeywords($thinkerId, $thoughtId, $query);
+		$keywordPairs = $this->tagCloudService->getKeywordPairs($thinkerId, $thoughtId, $query);
 
 		// Look up sentiment
 		if ($keywords) {
-			$sentiment = $sentimentService->getAverageSentiment($keywords);
+			$sentiment = $this->sentimentService->getAverageSentiment($keywords);
 			foreach ($keywords as $i => $row) {
-				$keywords[$i]["sentiment"] = $sentimentService->getSentiment($row["keyword"]);
+				$keywords[$i]["sentiment"] = $this->sentimentService->getSentiment($row["keyword"]);
 			}
 		}
 
 		// Retrieve keyword history
 		if (!$thoughtId) {
-			$keywordHistory = $keywordHistoryService->getKeywordHistory($thinkerId, $query);
+			$keywordHistory = $this->keywordHistoryService->getKeywordHistory($thinkerId, $query);
 		}
 
+		// Render bubble titles
+		list($title1, $title2) = $this->renderBubbleTitles($thinkerName, $thoughtId, $query);
+
+		// Render keyword bubbles
+		if ($keywords) {
+			$output .= $this->renderSentimentBubble($title1, $title2, $sentiment);
+			$output .= $this->renderKeywordBubble($title1, $title2, $keywords);
+		}
+
+		// Render keyword history
+		if ($keywordHistory) {
+			$output .= $this->renderKeywordHistoryBubble($title1, $title2, $keywordHistory);
+		}
+
+		// Render keyword pairs ("relationships")
+		if ($keywordPairs) {
+			$output .= $this->renderKeywordPairBubble($title1, $title2, $keywordPairs);
+		}
+
+		if ($keywords || $keywordPairs || $keywordHistory) {
+			$clearBoth = new Div("&nbsp;");
+			$clearBoth->set("style", "clear: both; font-size: 0");
+			$output .= $clearBoth;
+		}
+
+		return $output;
+	}
+
+	// Generate bubble titles
+	protected function renderBubbleTitles($thinkerName, $thoughtId, $query) {
 		/*
 		 * Render HTML for tag cloud
 		 */
@@ -76,87 +113,110 @@ class TagCloudSection extends Section
 			$title2 = "";
 		}
 
-		// Render keywords
-		if ($keywords) {
-			// Div for sentiment value
-			$div = new Div();
-			$div->set("class", "bubble tag_cloud");
-			$div->set("style", "float: left");
-			$div->addContent("${title1}Sentiment{$title2}: <br />");
-			$span = new Span();
-			$span->set("style", $this->_getSentimentStyle($sentiment, true));
-			if ($sentiment >= 0.5) {
-				$span->addContent("Positive");
-			} else if ($sentiment <= -0.50) {
-				$span->addContent("Negative");
+		return array($title1, $title2);
+	}
+
+	// Generate sentiment bubble
+	// @param $title1, $title2  For bubble header indicating whose thoughts and for what
+	// @param $sentiment Trending sentiment value
+	protected function renderSentimentBubble($title1, $title2, $sentiment) {
+		$output = "";
+
+		$div = new Div();
+		$div->set("class", "bubble tag_cloud");
+		$div->set("style", "float: left");
+		$div->addContent("${title1}Sentiment{$title2}: <br />");
+		$span = new Span();
+		$span->set("style", $this->getSentimentStyle($sentiment, true));
+		if ($sentiment >= 0.50) {
+			$span->addContent("Positive");
+		} else if ($sentiment <= -0.50) {
+			$span->addContent("Negative");
+		} else {
+			$span->addContent("Neutral");
+		}
+		$span->addContent(" (" . round($sentiment, 3) . ")");
+		$div->addContent($span);
+
+		$output .= $div;
+
+		return $output;
+	}
+
+	// Generate keyword bubble
+	// @param $title1, $title2  For bubble header indicating whose thoughts and for what
+	// @param keywords Keyword rows to display
+	protected function renderKeywordBubble($title1, $title2, $keywords) {
+		$output = "";
+
+		$div = new Div();
+		$div->set("class", "bubble tag_cloud");
+		$div->set("style", "float: left");
+		$div->addContent("${title1}Keywords${title2}: <br />");
+		$first = true;
+		foreach($keywords as $row)
+		{
+			if ($first) {
+				$first = false;
 			} else {
-				$span->addContent("Neutral");
+				$div->addContent(" &nbsp; ");
 			}
-			$span->addContent(" (" . round($sentiment, 3) . ")");
-			$div->addContent($span);
-			$output .= $div;
-
-			// Div for prominent keywords
-			$div = new Div();
-			$div->set("class", "bubble tag_cloud");
-			$div->set("style", "float: left");
-			$div->addContent("${title1}Keywords${title2}: <br />");
-			$first = true;
-			foreach($keywords as $row)
-			{
-				if ($first) {
-					$first = false;
-				} else {
-					$div->addContent(" &nbsp; ");
-				}
-				$keyword = $row["keyword"];
-				$count = $row["cnt"] * 5;
-				$link = new Anchor($formatService->getQueryURL($keyword),$keyword);
-				$link->set("style", "font-size: 1.${count}em; " .
-				                    $this->_getSentimentStyle($row["sentiment"]));
-				$div->addContent($link);
-			}
-			$output .= $div;
+			$keyword = $row["keyword"];
+			$count = $row["cnt"] * 5;
+			$link = new Anchor($this->formatService->getQueryURL($keyword),$keyword);
+			$link->set("style", "font-size: 1.${count}em; " .
+			           $this->getSentimentStyle($row["sentiment"]));
+			$div->addContent($link);
 		}
 
-		// Render keyword history
-		if ($keywordHistory) {
-			$div = new Div();
-			$div->set("class", "bubble tag_cloud");
-			$div->set("style", "float: left");
-			$div->addContent("${title1}Keyword History${title2} (last 30 days): <br />");
-			$div->addContent("<div id=\"keyword_history\" class=\"chart\"></div>");
-			$stream = new StreamDrawer("keyword_history", 250, 200, 30, $keywordHistory);
-			$output .= $div;
-			$output .= $stream->draw();
+		$output .= $div;
+
+		return $output;
+	}
+
+	// Generate keyword pair bubble
+	// @param $title1, $title2  For bubble header indicating whose thoughts and for what
+	// @param keywords Keyword pair rows to display
+	protected function renderKeywordPairBubble($title1, $title2, $keywordPairs) {
+		$output = "";
+
+		$div = new Div();
+		$div->set("class", "bubble tag_cloud");
+		$div->set("style", "float: left");
+		$div->addContent("${title1}Keyword Relationships${title2}: <br />");
+		$div->addContent("<div id=\"keyword_relationships\"></div>");
+		$graph = new GraphDrawer("keyword_relationships", 250, 200);
+		foreach($keywordPairs as $row)
+		{
+			$keyword1 = $row["kw1"];
+			$keyword2 = $row["kw2"];
+			$count = $row["cnt"] * 5;
+			$graph->addNode($keyword1, $this->formatService->getQueryURL($keyword1));
+			$graph->addNode($keyword2, $this->formatService->getQueryURL($keyword2));
+			$graph->addEdge($keyword1, $keyword2, $count);
 		}
 
-		// Render keyword pairs ("relationships")
-		if ($keywordPairs) {
-			$div = new Div();
-			$div->set("class", "bubble tag_cloud");
-			$div->set("style", "float: left");
-			$div->addContent("${title1}Keyword Relationships${title2}: <br />");
-			$div->addContent("<div id=\"keyword_relationships\"></div>");
-			$graph = new GraphDrawer("keyword_relationships", 250, 200);
-			foreach($keywordPairs as $row)
-			{
-				$keyword1 = $row["kw1"];
-				$keyword2 = $row["kw2"];
-				$count = $row["cnt"] * 5;
-				$graph->addNode($keyword1, $formatService->getQueryURL($keyword1));
-				$graph->addNode($keyword2, $formatService->getQueryURL($keyword2));
-				$graph->addEdge($keyword1, $keyword2, $count);
-			}
-			$output .= $div;
-			$output .= $graph->draw();
-		}
+		$output .= $div;
+		$output .= $graph->draw();
 
-		if ($keywords || $keywordPairs || $keywordHistory) {
-			$clearBoth = new Div("&nbsp;");
-			$clearBoth->set("style", "clear: both; font-size: 0");
-			$output .= $clearBoth;
-		}
+		return $output;
+	}
+
+	// Generate keyword history bubble
+	// @param $title1, $title2  For bubble header indicating whose thoughts and for what
+	// @param keywords Keyword day count rows to display
+	protected function renderKeywordHistoryBubble($title1, $title2, $keywordHistory) {
+		$output = "";
+
+		$div = new Div();
+		$div->set("class", "bubble tag_cloud");
+		$div->set("style", "float: left");
+		$div->addContent("${title1}Keyword History${title2} (last 30 days): <br />");
+		$div->addContent("<div id=\"keyword_history\" class=\"chart\"></div>");
+		$stream = new StreamDrawer("keyword_history", 250, 200, 30, $keywordHistory);
+
+		$output .= $div;
+		$output .= $stream->draw();
 
 		return $output;
 	}
@@ -166,7 +226,7 @@ class TagCloudSection extends Section
 	// @param $sentiment Sentiment value
 	// @param $size Boolean whether to make text bigger when sentiment is stronger
 	//              (i.e. the magnitude of its absolute value is higher)
-	protected function _getSentimentStyle($sentiment, $size=false) {
+	protected function getSentimentStyle($sentiment, $size=false) {
 		if ($sentiment >= 0.5) {
 			$colour = "green";
 		} else if ($sentiment <= -0.5) {
