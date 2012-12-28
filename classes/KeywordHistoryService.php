@@ -45,23 +45,25 @@ class KeywordHistoryService
 
 		// Query for keywords related to this thinker and query and count how many for each day
 		if($wordlist) {
-			$query = "SELECT k2.keyword as keyword, $daySQL as day, COUNT(t.thought_id) as cnt " .
+			$query = "SELECT k2.keyword as keyword, COUNT(t.thought_id) as cnt " .
 			         " FROM keywords k1, keywords k2, mentions m1, mentions m2, thoughts t " .
 			         " WHERE k1.keyword IN ($wordlist) " .
 			         "   AND k1.keyword_id = m1.keyword_id " .
 			         "   AND k2.keyword_id = m2.keyword_id " .
 		        	 "   AND t.thought_id = m1.thought_id " .
 			         "   AND t.thought_id = m2.thought_id " .
+			         "   AND $daySQL = $day " .
 			         "   AND $thinkerSQL " .
-			         " GROUP BY k2.keyword_id HAVING day = $day ".
+			         " GROUP BY k2.keyword_id ".
 			         " ORDER BY cnt DESC LIMIT 10 ";
 		} else {
-			$query = "SELECT k.keyword as keyword, $daySQL as day, COUNT(t.thought_id) as cnt " .
+			$query = "SELECT k.keyword as keyword, COUNT(t.thought_id) as cnt " .
 			         " FROM keywords k, mentions m, thoughts t " .
 			         " WHERE k.keyword_id = m.keyword_id " .
 			       	 "   AND t.thought_id = m.thought_id " .
+			         "   AND $daySQL = $day " .
 			         "   AND $thinkerSQL " .
-			         " GROUP BY k.keyword_id HAVING day = $day ".
+			         " GROUP BY k.keyword_id ".
 			         " ORDER BY cnt DESC LIMIT 10 ";
 		}
 		return mysql_query($query);
