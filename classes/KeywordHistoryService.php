@@ -15,6 +15,8 @@ class KeywordHistoryService
 	function getKeywordHistory($thinkerId, $query)
 	{
 		// Generate the query statement
+		$sql = "";
+
 		if ($query) {
 			$words = $this->keywordService->getWords($query);
 			$wordlist = $this->keywordService->getKeywordsSQL($words);
@@ -24,15 +26,15 @@ class KeywordHistoryService
 		$thinkerSQL = $thinkerId ? "t.thinker_id = '$thinkerId'" : "TRUE";
 
 		for ($day = 0; $day < 30; $day++) {
-			$query .= "(" . $this->getDayQuery($thinkerSQL, $wordlist, $day) . ")";
+			$sql .= "(" . $this->getDayQuery($thinkerSQL, $wordlist, $day) . ")";
 			if ($day < 29) {
-				$query .= " UNION ";
+				$sql .= " UNION ";
 			}
 		}
 
 		// Retrieve the keyword day counts
 		$keywordHistory = array();
-		$result = mysql_query($query);
+		$result = mysql_query($sql);
 		while ($row = mysql_fetch_array($result)) {
 			$keyword = $row["keyword"];
 			$count = (int)$row["cnt"];
