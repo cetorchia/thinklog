@@ -11,12 +11,9 @@ class TagCloudSection extends Section
 	protected $thoughtId;
 	protected $query;
 
-	public function __construct($serverRequest, $services, $login, $thinkerId=null, $thoughtId=null, $query=null)
+	public function __construct(&$serverRequest, &$services, &$login, $thinkerId=null, $thoughtId=null, $query=null)
 	{
-		$this->serverRequest = $serverRequest;
-		$this->services = $services;
-		$this->login = $login;
-
+		parent::__construct($serverRequest, $services, $login);
 		$this->thinkerId = $thinkerId;
 		$this->thoughtId = $thoughtId;
 		$this->query= $query;
