@@ -126,6 +126,10 @@ class AddRequest
 					$params .= "&error";
 					$success = false;
 				}
+				if ($this->addService->duplicate) {
+					$params .= "&duplicate";
+					$success = false;
+				}
 				if ($this->addService->noThoughts) {
 					$params .= "&noThoughts";
 					$success = false;

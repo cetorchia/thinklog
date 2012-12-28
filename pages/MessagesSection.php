@@ -9,6 +9,7 @@ class MessagesSection
 	protected $tooLong;
 	protected $noThoughts;
 	protected $invalidURL;
+	protected $duplicate;
 	protected $error;
 	protected $success;
 
@@ -20,6 +21,7 @@ class MessagesSection
 		$this->tooLong = isset($GET["tooLong"]);
 		$this->noThoughts = isset($GET["noThoughts"]);
 		$this->invalidURL = isset($GET["invalidURL"]);
+		$this->duplicate = isset($GET["duplicate"]);
 		$this->error = isset($GET["error"]);
 		$this->success = isset($GET["success"]);
 	}
@@ -35,7 +37,8 @@ class MessagesSection
 				$par = new Paragraph();
 				$span = new Span();
 				$span->set("class", "thot_error");
-				$span->setContent("I could not add or modify some of your thoughts: you do not have permission. Try logging in.");
+				$span->setContent("I could not add or modify some of your thought(s): ");
+				$span->addContent("you do not have permission. Try logging in.");
 				$par->setContent($span);
 
 				$output = "" . $par;
@@ -46,7 +49,7 @@ class MessagesSection
 				$par = new Paragraph();
 				$span = new Span();
 				$span->set("class", "thot_error");
-				$span->setContent("I could not add some of your thoughts: a thought is too long!");
+				$span->setContent("I could not add some of your thought(s): a thought is too long!");
 				$par->setContent($span);
 
 				$output = "" . $par;
@@ -56,7 +59,7 @@ class MessagesSection
 				$par = new Paragraph();
 				$span = new Span();
 				$span->set("class", "thot_error");
-				$span->setContent("I could not add your thoughts: there are no thought(s) to add!");
+				$span->setContent("I could not add your thought(s): there are no thought(s) to add!");
 				$par->setContent($span);
 
 				$output = "" . $par;
@@ -66,7 +69,7 @@ class MessagesSection
 				$par = new Paragraph();
 				$span = new Span();
 				$span->set("class", "thot_error");
-				$span->setContent("I could not add your thoughts: you did not specify a proper URL!");
+				$span->setContent("I could not add your thought(s): you did not specify a proper URL!");
 				$par->setContent($span);
 
 				$output = "" . $par;
@@ -76,7 +79,17 @@ class MessagesSection
 				$par = new Paragraph();
 				$span = new Span();
 				$span->set("class", "thot_error");
-				$span->setContent("I could not add or modify some of your thoughts: error occurred.");
+				$span->setContent("I could not add or modify some of your thought(s): error occurred.");
+				$par->setContent($span);
+
+				$output = "" . $par;
+			}
+			if($this->duplicate) {
+				$par = new Paragraph();
+				$span = new Span();
+				$span->set("class", "thot_error");
+				$span->setContent("I could not add or modify some of your thought(s): ");
+				$span->addContent("thought already exists");
 				$par->setContent($span);
 
 				$output = "" . $par;

@@ -11,6 +11,7 @@ class AddService
 {
 	// Error statuses
 	public $error;
+	public $duplicate;
 	public $tooLong;
 	public $noThoughts;
 	public $invalidURL;
@@ -28,6 +29,7 @@ class AddService
 
 		$this->noThoughts = true;	// None yet
 		$this->error = $this->tooLong = $this->invalidURL = false;
+		$this->duplicate = false;
 	}
 
 	// Set the login data so we know the thinker's ID
@@ -192,12 +194,17 @@ class AddService
 					$thought->setDate($date);
 				}
 
-				if($this->thoughtService->add($thought))
-				{
+				if($this->thoughtService->add($thought)) {
 					$this->mentionsService->mentions($thought);	// Tag keywords
 					return true;
 				} else {
-					$this->error = true;
+					// Error inserting the thought into the database
+					$DUPLICATE_ENTRY = "Duplicate entry";
+					if ($DUPLICATE_ENTRY == substr(mysql_error(), 0, strlen($DUPLICATE_ENTRY))) {
+						$this->duplicate = true;
+					} else {
+						$this->error = true;
+					}
 					return false;
 				}
 			}
