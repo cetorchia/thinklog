@@ -95,7 +95,7 @@ class TagCloudSection extends Section
 		/*
 		 * Render HTML for tag cloud
 		 */
-		if ($thinkerId) {
+		if ($thinkerName) {
 			$title1 = "$thinkerName's ";
 		} else {
 			$title1 = "";
